@@ -1,216 +1,558 @@
-<div id="hyper-subpage" class="container-fluid" style="float:left;">
-	<div class="row">
-		<div class="col-lg-12">
-			<h3 class="page-header"><svg data-src="svg/overview_heartbeat.svg" width="28" height="28" fill="currentColor" class="svg4hyperhdr"></svg><span data-i18n="main_menu_dashboard_token">Dashboard</span></h3>
-			<div id="dash_intro">
-				<div class="row">
-					<div class="col-12 col-lg-7 col-xl-8 col-xxl-7">
-						<div class="card card-default">
-							<div class="card-header">
-								<svg data-src="svg/overview_heartbeat.svg" width="18" height="18" fill="currentColor" class="svg4hyperhdr"></svg>
-								<span data-i18n="dashboard_infobox_label_title">Information</span>
-							</div>
-							<div class="card-body">
-								<div class="container px-2">
-									<div class="row">
-										<div class="col-5 col-md-4" data-i18n="dashboard_infobox_label_statush"></div>
-										<div class="col-7 col-md-8" id="dash_statush" style="font-weight:bold">unknown</div>
-									</div>
-									<div class="row mt-3">
-										<div class="col-5 col-md-4" data-i18n="dashboard_infobox_label_platform">Platform:</div>
-										<div class="col-7 col-md-8" id="dash_platform"></div>
-									</div>
-									<div class="row mt-3">
-										<div class="col-5 col-md-4" data-i18n="dashboard_current_video_device">Video device</div>
-										<div class="col-7 col-md-8" id="dash_current_video_device"></div>
-									</div>
-									<div class="row mt-3">
-										<div class="col-5 col-md-4" data-i18n="dashboard_current_video_mode">Video mode</div>
-										<div class="col-7 col-md-8" id="dash_current_video_mode"></div>
-									</div>
-									<div class="row mt-3">
-										<div class="col-5 col-md-4" data-i18n="conf_leds_contr_label_contrtype">LED type:</div>
-										<div class="col-7 col-md-8" id="dash_leddevice"></div>
-									</div>
-									<div class="row mt-3">
-										<div class="col-5 col-md-4" data-i18n="dashboard_infobox_label_instance">Instance</div>
-										<div class="col-7 col-md-8" id="dash_instance"></div>
-									</div>
-									<div class="row mt-3">
-										<div class="col-5 col-md-4" data-i18n="dashboard_infobox_label_currenthyp">HyperHDR version:</div>
-										<div class="col-7 col-md-8" id="dash_currv">unknown</div>
-									</div>
-									<div class="row mt-3">
-										<div class="col-5 col-md-4" data-i18n="dashboard_infobox_label_latesthyp">Latest version:</div>
-										<div class="col-7 col-md-8" id="dash_latev">unknown</div>
-									</div>
-								</div>
-								<hr>
-								<p style="font-weight:bold" data-i18n="dashboard_infobox_label_smartacc">Smart Access<p>
-									<span id="btn_hsc"></span>
-									<hr>
-									<div id="versioninforesult"></div>
-							</div>
-						</div>
-						<div class="card card-default performance_stats" id="performance_counters_card">
-							<div class="card-header">
-								<svg data-src="svg/overview_performance.svg" fill="currentColor" class="svg4hyperhdr"></svg>
-								<span data-i18n="dashboard_performance_label_title">Performance</span>
-							</div>
-							<div class="card-body">
-								<div class="container px-2">
-									<div class="row">
-										<div class="col-12 lh-lg">
-											<div class="row w-100 d-none" id="perf_cell_hardware">
-												<div class="col-12 col-md-6 pt-1 pb-1 d-none" id="perf_cell_cpu_usage">
-													<div class="row w-100 border-bottom text-primary">
-														<div class="col-12"><svg data-src="svg/performance_cpu.svg" fill="currentColor" class="svg4hyperhdr"></svg><b>CPU</b></div>
-													</div>
-													<div class="row w-100">
-														<div class="col-12" id="perf_cpu_usage">
-														</div>
-													</div>
-												</div>
-												<div class="col-12 col-md-6 pt-1 pb-1 d-none" id="perf_cell_ram_usage">
-													<div class="row w-100 border-bottom text-primary">
-														<div class="col-12"><svg data-src="svg/performance_ram.svg" fill="currentColor" class="svg4hyperhdr"></svg><b>RAM</b></div>
-													</div>
-													<div class="row w-100">
-														<div class="col-12" id="perf_ram_usage">
-														</div>
-													</div>
-												</div>
-											</div>
-											<div class="row w-100 d-none" id="perf_cell_linux">
-												<div class="col-12 col-md-6 pt-1 pb-1 d-none" id="perf_cell_temperature">
-													<div class="row w-100 border-bottom text-primary fw-bold">
-														<div class="col-12"><svg data-src="svg/performance_temperature.svg" fill="currentColor" class="svg4hyperhdr" style="margin-right:0.2em;"></svg><span data-i18n="perf_temperature">Temperature</span></div>
-													</div>
-													<div class="row w-100">
-														<div class="col-12" id="perf_temperature">
-														</div>
-													</div>
-												</div>
-												<div class="col-12 col-md-6 pt-1 pb-1 d-none" id="perf_cell_undervoltage">
-													<div class="row w-100 border-bottom text-primary fw-bold">
-														<div class="col-12"><svg data-src="svg/voltage.svg" fill="currentColor" class="svg4hyperhdr" style="margin-right:0.2em;"></svg><span data-i18n="perf_undervoltage">Undervoltage</span></div>
-													</div>
-													<div class="row w-100">
-														<div class="col-12" id="perf_undervoltage">
-														</div>
-													</div>
-												</div>
-											</div>
-											<div class="d-none mt-2" id="perf_grabber_data">
-												<div class="row border-bottom fw-bold text-primary col-12">
-													<div class="col-12"><svg data-src="svg/usb.svg" fill="currentColor" class="svg4hyperhdr" style="margin-right:0.2em;"></svg><span data-i18n="perf_usb_grabber"></span></div>
-												</div>
-												<div class="col-12 pt-2 pb-1">
-													<span id="perf_usb_data_holder"></span>
-												</div>
-											</div>
-											<div class="row border-bottom fw-bold mt-2">
-												<div id="perf_instance_header" class="col-12 col-md-6 text-primary">
-													<div class="row">
-														<div class="col-md-6 col-xs-12">
-															<span data-i18n="perf_usb_instance">Instance</span>
-														</div>
-														<div class="col-md-6 col-xs-12">
-															⇒&nbsp;<i><span data-i18n="general_comp_SMOOTHING">Smoothing</span></i>&nbsp;⇒
-														</div>
-													</div>
-												</div>
-												<div id="perf_led_header" class="col-12 col-md-6 text-primary">
-													<span data-i18n="general_comp_LEDDEVICE">LED device</span>
-												</div>
-											</div>
-											<div id="perf_per_instance_data_holder" class="w-100">
-											</div>
-											<div id="perf_per_instance_data_row" class="row mt-1 pb-1">
-												<div class="col-12 col-sm-6 pt-1 pb-1"></div>
-												<div class="col-12 col-sm-6 pt-1 pb-1"></div>
-											</div>
-										</div>
-										<div class="col-12 col-md-6"></div>
-									</div>
-								</div>
-							</div>
-						</div>
+<div id="hyper-subpage" class="container-fluid dash-root">
+
+	<!-- ═══════════════════════════════════════════════════════
+	     PAGE HEADER
+	═══════════════════════════════════════════════════════ -->
+	<div class="dash-page-header">
+		<div class="dash-page-title">
+			<svg data-src="svg/overview_heartbeat.svg" width="26" height="26" fill="currentColor" class="svg4hyperhdr"></svg>
+			<span data-i18n="main_menu_dashboard_token">Dashboard</span>
+		</div>
+		<div class="dash-page-actions">
+			<span id="btn_hsc"></span>
+		</div>
+	</div>
+
+	<div id="dash_intro">
+
+		<!-- ═══════════════════════════════════════════════════
+		     STAT STRIP  (4 quick-glance tiles)
+		═══════════════════════════════════════════════════ -->
+		<div class="dash-stat-strip">
+
+			<div class="dash-tile dash-tile--blue">
+				<div class="dash-tile-icon">
+					<svg data-src="svg/overview_heartbeat.svg" fill="currentColor" class="svg4hyperhdr me-0"></svg>
+				</div>
+				<div class="dash-tile-body">
+					<div class="dash-tile-label" data-i18n="dashboard_infobox_label_statush">Status</div>
+					<div class="dash-tile-value" id="dash_statush">—</div>
+				</div>
+			</div>
+
+			<div class="dash-tile dash-tile--purple">
+				<div class="dash-tile-icon">
+					<svg data-src="svg/instances.svg" fill="currentColor" class="svg4hyperhdr me-0"></svg>
+				</div>
+				<div class="dash-tile-body">
+					<div class="dash-tile-label" data-i18n="dashboard_infobox_label_instance">Instance</div>
+					<div class="dash-tile-value dash-tile-value--sm" id="dash_instance">—</div>
+				</div>
+			</div>
+
+			<div class="dash-tile dash-tile--amber">
+				<div class="dash-tile-icon">
+					<svg data-src="svg/light_source.svg" fill="currentColor" class="svg4hyperhdr me-0"></svg>
+				</div>
+				<div class="dash-tile-body">
+					<div class="dash-tile-label" data-i18n="conf_leds_contr_label_contrtype">LED type</div>
+					<div class="dash-tile-value dash-tile-value--sm" id="dash_leddevice">—</div>
+				</div>
+			</div>
+
+			<div class="dash-tile dash-tile--teal">
+				<div class="dash-tile-icon">
+					<svg data-src="svg/capturing.svg" fill="currentColor" class="svg4hyperhdr me-0"></svg>
+				</div>
+				<div class="dash-tile-body">
+					<div class="dash-tile-label" data-i18n="dashboard_infobox_label_platform">Platform</div>
+					<div class="dash-tile-value dash-tile-value--sm" id="dash_platform">—</div>
+				</div>
+			</div>
+
+		</div>
+		<!-- /stat strip -->
+
+
+		<!-- ═══════════════════════════════════════════════════
+		     MAIN TWO-COLUMN GRID
+		═══════════════════════════════════════════════════ -->
+		<div class="row g-3">
+
+			<!-- ────────────────── LEFT COLUMN ────────────── -->
+			<div class="col-12 col-lg-7 col-xl-8 col-xxl-7 d-flex flex-column gap-3">
+
+				<!-- ── System information ──────────────────── -->
+				<div class="card card-default dash-card">
+					<div class="card-header d-flex align-items-center gap-2">
+						<svg data-src="svg/overview_heartbeat.svg" width="17" height="17" fill="currentColor" class="svg4hyperhdr me-0"></svg>
+						<span data-i18n="dashboard_infobox_label_title">Information</span>
 					</div>
-					<div class="col-12 col-lg-5 col-xl-4 col-xxl-5" style="min-width: 280px">
-						<div class="card card-default">
-							<div class="card-header" id="compent_status_header">
-								<svg data-src="svg/components.svg" fill="currentColor" class="svg4hyperhdr"></svg>
-								<span data-i18n="dashboard_componentbox_label_title">Components status</span>
+					<div class="card-body">
+
+						<dl class="dash-dl">
+
+							<div class="dash-dl-row">
+								<dt data-i18n="dashboard_current_video_device">Video device</dt>
+								<dd id="dash_current_video_device">—</dd>
 							</div>
-							<div class="card-body">
-								<div class="container" id="tab_components">
-								</div>
+
+							<div class="dash-dl-row">
+								<dt data-i18n="dashboard_current_video_mode">Video mode</dt>
+								<dd id="dash_current_video_mode">—</dd>
 							</div>
-						</div>
-						<div class="card card-default d-none" id="device_discovery_panel">
-							<div class="card-header">
-								<svg data-src="svg/device_discovery.svg" fill="currentColor" class="svg4hyperhdr"></svg>
-								<span data-i18n="device_discovery">Device discovery</span>
+
+							<div class="dash-dl-row">
+								<dt data-i18n="dashboard_infobox_label_currenthyp">HyperHDR version</dt>
+								<dd id="dash_currv" class="fw-semibold">unknown</dd>
 							</div>
-							<div class="card-body">
-								<div class="container" id="device_discovery_container">
-								</div>
+
+							<div class="dash-dl-row">
+								<dt data-i18n="dashboard_infobox_label_latesthyp">Latest version</dt>
+								<dd id="dash_latev">unknown</dd>
 							</div>
-						</div>
-						<div class="card card-default">
-							<div class="card-header">
-								<svg data-src="svg/overview_hyperhdr_sites.svg" fill="currentColor" class="svg4hyperhdr"></svg>
-								<span data-i18n="dashboard_newsbox_label_title">Visit HyperHDR sites</span>
-								<div class="card-tools">
-									<img src="img/hyperhdr/rainbow.png"></img>
-								</div>
-							</div>
-							<div class="card-body">
-								<div class="container ps-0 pe-0">
-									<div class="row">
-										<div class="col">
-											<a href="http://www.hyperhdr.eu/" target="_blank" class="unlink">
-												<div class="w-100 support-container" style="margin-top: 0px;">
-													<div class="d-flex justify-content-center align-items-center">
-														<div class="bg-color-wf">
-															<svg data-src="svg/overview_globe.svg" fill="currentColor" class="svg4hyperhdr me-0 position-static" style="width:54px;"></svg>
-														</div>
-													</div>
-													<h4 data-i18n="support_label_webpagetitle">Webpage</h4>
-													<p data-i18n="support_label_webpagetext">HyperHDR's blog</p>
-												</div>
-											</a>
-										</div>
-										<div class="col">
-											<a href="https://github.com/awawa-dev/HyperHDR" target="_blank" class="unlink">
-												<div class="w-100 support-container" style="margin-top: 0px;">
-													<div class="d-flex justify-content-center align-items-center">
-														<div class="bg-color-wf">
-															<svg data-src="svg/overview_github.svg" fill="currentColor" class="svg4hyperhdr me-0 position-static" style="width:54px;"></svg>
-														</div>
-													</div>
-													<h4>Github</h4>
-													<p data-i18n="support_label_ghtext">HyperHDR's Github repository</p>
-												</div>
-											</a>
-										</div>
-									</div>
-								</div>
-							</div>
-						</div>
-					</div>
-					<div class="col-md-12 col-lg-5" style="">
+
+						</dl>
+
+						<div class="dash-divider"></div>
+						<div class="dash-section-label" data-i18n="dashboard_infobox_label_smartacc">Smart Access</div>
+						<div class="mt-2" id="versioninforesult"></div>
 
 					</div>
 				</div>
-			</div>
-			<!-- /.col-lg-12 -->
-		</div>
-		<!-- /.row -->
-	</div>
-	<!-- /.container-fluid -->
+				<!-- /information -->
 
-	<script>
-		$.getScript("/js/overview.js");
-	</script>
+
+				<!-- ── Performance ─────────────────────────── -->
+				<div class="card card-default dash-card performance_stats" id="performance_counters_card">
+					<div class="card-header d-flex align-items-center gap-2">
+						<svg data-src="svg/overview_performance.svg" fill="currentColor" class="svg4hyperhdr me-0"></svg>
+						<span data-i18n="dashboard_performance_label_title">Performance</span>
+					</div>
+					<div class="card-body">
+
+						<!-- CPU + RAM — JS removes d-none when data arrives -->
+						<div class="row g-2 d-none" id="perf_cell_hardware">
+
+							<div class="col-12 col-md-6 d-none" id="perf_cell_cpu_usage">
+								<div class="dash-perf-tile">
+									<div class="dash-perf-tile-hdr text-primary">
+										<svg data-src="svg/performance_cpu.svg" fill="currentColor" class="svg4hyperhdr"></svg>
+										<strong>CPU</strong>
+									</div>
+									<div id="perf_cpu_usage" class="dash-perf-tile-body"></div>
+								</div>
+							</div>
+
+							<div class="col-12 col-md-6 d-none" id="perf_cell_ram_usage">
+								<div class="dash-perf-tile">
+									<div class="dash-perf-tile-hdr text-primary">
+										<svg data-src="svg/performance_ram.svg" fill="currentColor" class="svg4hyperhdr"></svg>
+										<strong>RAM</strong>
+									</div>
+									<div id="perf_ram_usage" class="dash-perf-tile-body"></div>
+								</div>
+							</div>
+
+						</div>
+
+						<!-- Temperature + undervoltage (Linux) — JS removes d-none -->
+						<div class="row g-2 d-none" id="perf_cell_linux">
+
+							<div class="col-12 col-md-6 d-none" id="perf_cell_temperature">
+								<div class="dash-perf-tile">
+									<div class="dash-perf-tile-hdr text-primary">
+										<svg data-src="svg/performance_temperature.svg" fill="currentColor" class="svg4hyperhdr" style="margin-right:.2em;"></svg>
+										<strong data-i18n="perf_temperature">Temperature</strong>
+									</div>
+									<div id="perf_temperature" class="dash-perf-tile-body"></div>
+								</div>
+							</div>
+
+							<div class="col-12 col-md-6 d-none" id="perf_cell_undervoltage">
+								<div class="dash-perf-tile">
+									<div class="dash-perf-tile-hdr text-primary">
+										<svg data-src="svg/voltage.svg" fill="currentColor" class="svg4hyperhdr" style="margin-right:.2em;"></svg>
+										<strong data-i18n="perf_undervoltage">Undervoltage</strong>
+									</div>
+									<div id="perf_undervoltage" class="dash-perf-tile-body"></div>
+								</div>
+							</div>
+
+						</div>
+
+						<!-- USB grabber — JS adds/removes d-none -->
+						<div class="d-none mt-2" id="perf_grabber_data">
+							<div class="dash-perf-section-hdr text-primary">
+								<svg data-src="svg/usb.svg" fill="currentColor" class="svg4hyperhdr" style="margin-right:.2em;"></svg>
+								<strong data-i18n="perf_usb_grabber"></strong>
+							</div>
+							<div class="ps-1 pt-2 pb-1">
+								<span id="perf_usb_data_holder"></span>
+							</div>
+						</div>
+
+						<!-- Pipeline column headers -->
+						<div class="dash-perf-section-hdr text-primary mt-2 fw-bold">
+							<div class="row w-100 m-0">
+								<div id="perf_instance_header" class="col-12 col-md-6 ps-0">
+									<div class="row m-0">
+										<div class="col-md-6 col-12 ps-0">
+											<span data-i18n="perf_usb_instance">Instance</span>
+										</div>
+										<div class="col-md-6 col-12 ps-0">
+											⇒&nbsp;<i><span data-i18n="general_comp_SMOOTHING">Smoothing</span></i>&nbsp;⇒
+										</div>
+									</div>
+								</div>
+								<div id="perf_led_header" class="col-12 col-md-6 ps-0">
+									<span data-i18n="general_comp_LEDDEVICE">LED device</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- JS appends clones of perf_per_instance_data_row here -->
+						<div id="perf_per_instance_data_holder" class="w-100"></div>
+
+						<!-- Template row — must keep exactly 2 direct children
+						     JS uses firstElementChild (type==2) and lastElementChild (type==3) -->
+						<div id="perf_per_instance_data_row" class="row mt-1 pb-1">
+							<div class="col-12 col-sm-6 pt-1 pb-1"></div>
+							<div class="col-12 col-sm-6 pt-1 pb-1"></div>
+						</div>
+
+					</div>
+				</div>
+				<!-- /performance -->
+
+			</div>
+			<!-- /left col -->
+
+
+			<!-- ────────────────── RIGHT COLUMN ───────────── -->
+			<div class="col-12 col-lg-5 col-xl-4 col-xxl-5 d-flex flex-column gap-3" style="min-width:280px;">
+
+				<!-- ── Components status ───────────────────── -->
+				<div class="card card-default dash-card">
+					<!-- JS calls putInstanceName() on this element -->
+					<div class="card-header d-flex align-items-center gap-2" id="compent_status_header">
+						<svg data-src="svg/components.svg" fill="currentColor" class="svg4hyperhdr me-0"></svg>
+						<span data-i18n="dashboard_componentbox_label_title">Components status</span>
+					</div>
+					<!-- JS writes row/border-bottom rows directly into this div -->
+					<div id="tab_components" class="dash-comp-table"></div>
+				</div>
+
+				<!-- ── Device discovery — JS shows/hides via d-none ── -->
+				<div class="card card-default dash-card d-none" id="device_discovery_panel">
+					<div class="card-header d-flex align-items-center gap-2">
+						<svg data-src="svg/device_discovery.svg" fill="currentColor" class="svg4hyperhdr me-0"></svg>
+						<span data-i18n="device_discovery">Device discovery</span>
+					</div>
+					<!-- JS writes rows directly into this div -->
+					<div id="device_discovery_container" class="dash-comp-table"></div>
+				</div>
+
+				<!-- ── HyperHDR sites ──────────────────────── -->
+				<div class="card card-default dash-card">
+					<div class="card-header d-flex align-items-center gap-2">
+						<svg data-src="svg/overview_hyperhdr_sites.svg" fill="currentColor" class="svg4hyperhdr me-0"></svg>
+						<span data-i18n="dashboard_newsbox_label_title">HyperHDR Sites</span>
+						<div class="ms-auto">
+							<img src="img/hyperhdr/rainbow.png" style="height:15px;border-radius:4px;opacity:.8;">
+						</div>
+					</div>
+					<div class="card-body p-2">
+						<div class="dash-sites-list">
+
+							<a href="http://www.hyperhdr.eu/" target="_blank" class="unlink dash-site-row">
+								<div class="dash-site-icon-wrap">
+									<svg data-src="svg/overview_globe.svg" fill="currentColor" class="svg4hyperhdr me-0 position-static" style="width:26px;height:26px;"></svg>
+								</div>
+								<div class="dash-site-text">
+									<span class="dash-site-name" data-i18n="support_label_webpagetitle">Webpage</span>
+									<span class="dash-site-sub" data-i18n="support_label_webpagetext">HyperHDR's blog</span>
+								</div>
+								<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" class="dash-site-arrow"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+							</a>
+
+							<a href="https://github.com/awawa-dev/HyperHDR" target="_blank" class="unlink dash-site-row">
+								<div class="dash-site-icon-wrap">
+									<svg data-src="svg/overview_github.svg" fill="currentColor" class="svg4hyperhdr me-0 position-static" style="width:26px;height:26px;"></svg>
+								</div>
+								<div class="dash-site-text">
+									<span class="dash-site-name">GitHub</span>
+									<span class="dash-site-sub" data-i18n="support_label_ghtext">HyperHDR's repository</span>
+								</div>
+								<svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24" class="dash-site-arrow"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+							</a>
+
+						</div>
+					</div>
+				</div>
+				<!-- /sites -->
+
+			</div>
+			<!-- /right col -->
+
+		</div>
+		<!-- /row -->
+
+	</div>
+	<!-- /dash_intro -->
+
+</div>
+<!-- /hyper-subpage -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     OVERVIEW STYLES
+═══════════════════════════════════════════════════════════ -->
+<style>
+
+/* ── Root ─────────────────────────────────────────────────── */
+.dash-root { padding: 16px 20px 28px; }
+
+/* ── Page header ──────────────────────────────────────────── */
+.dash-page-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	margin-bottom: 20px;
+	padding-bottom: 14px;
+	border-bottom: 2px solid;
+}
+body:not(.dark-mode) .dash-page-header { border-color: #e8edf4; }
+.dark-mode            .dash-page-header { border-color: rgba(255,255,255,.07); }
+
+.dash-page-title {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	font-size: 1.35rem;
+	font-weight: 700;
+	letter-spacing: -.01em;
+}
+.dash-page-title svg { flex-shrink: 0; opacity: .75; margin: 0; }
+.dash-page-actions .btn {
+	font-size: .78rem !important;
+	padding: 5px 14px !important;
+	border-radius: 8px !important;
+}
+
+/* ── Stat strip ───────────────────────────────────────────── */
+.dash-stat-strip {
+	display: grid;
+	grid-template-columns: repeat(4, 1fr);
+	gap: 12px;
+	margin-bottom: 20px;
+}
+@media (max-width: 991px) { .dash-stat-strip { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 479px) { .dash-stat-strip { grid-template-columns: 1fr; } }
+
+.dash-tile {
+	display: flex;
+	align-items: center;
+	gap: 14px;
+	padding: 15px 16px;
+	border-radius: 14px;
+	transition: transform .18s ease, box-shadow .18s ease;
+}
+body:not(.dark-mode) .dash-tile {
+	background: #fff;
+	box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 14px rgba(0,0,0,.05);
+}
+.dark-mode .dash-tile {
+	background: #1f2535;
+	box-shadow: 0 1px 4px rgba(0,0,0,.22), 0 4px 14px rgba(0,0,0,.18);
+}
+.dash-tile:hover {
+	transform: translateY(-2px);
+	box-shadow: 0 6px 22px rgba(0,0,0,.13) !important;
+}
+
+.dash-tile-icon {
+	width: 44px; height: 44px;
+	border-radius: 11px;
+	display: flex; align-items: center; justify-content: center;
+	flex-shrink: 0;
+}
+.dash-tile-icon svg { width: 21px; height: 21px; margin: 0; }
+
+.dash-tile--blue   .dash-tile-icon { background: rgba(59,158,221,.14); color: #3b9edd; }
+.dash-tile--purple .dash-tile-icon { background: rgba(139,92,246,.14); color: #8b5cf6; }
+.dash-tile--amber  .dash-tile-icon { background: rgba(245,158,11,.14); color: #f59e0b; }
+.dash-tile--teal   .dash-tile-icon { background: rgba(20,184,166,.14); color: #14b8a6; }
+
+.dash-tile-body { min-width: 0; flex: 1; }
+.dash-tile-label {
+	font-size: .68rem;
+	font-weight: 700;
+	letter-spacing: .07em;
+	text-transform: uppercase;
+	opacity: .5;
+	margin-bottom: 3px;
+	white-space: nowrap;
+}
+.dash-tile-value        { font-size: .95rem; font-weight: 700; line-height: 1.25; }
+.dash-tile-value--sm    { font-size: .8rem;  font-weight: 600; }
+
+/* ── Card overrides ───────────────────────────────────────── */
+.dash-card                 { border-radius: 14px !important; }
+.dash-card .card-header    { padding: 12px 18px !important; font-size: .88rem !important; font-weight: 600; }
+.dash-card .card-header svg { flex-shrink: 0; }
+.dash-card .card-body      { padding: 18px !important; }
+
+/* ── Info dl ──────────────────────────────────────────────── */
+.dash-dl { display: flex; flex-direction: column; margin: 0; }
+.dash-dl-row {
+	display: flex;
+	align-items: baseline;
+	gap: 14px;
+	padding: 9px 0;
+	border-bottom: 1px solid;
+}
+body:not(.dark-mode) .dash-dl-row { border-color: #f0f3f7; }
+.dark-mode            .dash-dl-row { border-color: rgba(255,255,255,.06); }
+.dash-dl-row:last-child            { border-bottom: none; padding-bottom: 2px; }
+
+.dash-dl dt {
+	flex: 0 0 155px;
+	font-size: .78rem;
+	opacity: .55;
+	font-weight: 500;
+}
+.dash-dl dd {
+	flex: 1;
+	margin: 0;
+	font-size: .88rem;
+	min-width: 0;
+	word-break: break-word;
+}
+
+/* ── Divider & section label ──────────────────────────────── */
+.dash-divider { height: 1px; margin: 16px 0 12px; }
+body:not(.dark-mode) .dash-divider { background: #edf1f6; }
+.dark-mode            .dash-divider { background: rgba(255,255,255,.07); }
+
+.dash-section-label {
+	font-size: .7rem;
+	font-weight: 700;
+	letter-spacing: .07em;
+	text-transform: uppercase;
+	opacity: .45;
+	margin-bottom: 8px;
+}
+
+/* Version callout override */
+#versioninforesult .callout {
+	border-radius: 9px !important;
+	padding: 10px 14px !important;
+	font-size: .84rem;
+	margin: 0 !important;
+}
+
+/* ── Performance tiles ────────────────────────────────────── */
+.dash-perf-tile {
+	padding: 11px 13px;
+	border-radius: 10px;
+	height: 100%;
+}
+body:not(.dark-mode) .dash-perf-tile { background: #f5f8fc; }
+.dark-mode            .dash-perf-tile { background: rgba(255,255,255,.04); }
+
+.dash-perf-tile-hdr {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: .8rem;
+	padding-bottom: 7px;
+	margin-bottom: 6px;
+	border-bottom: 1px solid;
+}
+body:not(.dark-mode) .dash-perf-tile-hdr { border-color: #dde3ea; }
+.dark-mode            .dash-perf-tile-hdr { border-color: rgba(255,255,255,.08); }
+.dash-perf-tile-body { font-size: .84rem; line-height: 1.6; padding-top: 2px; }
+
+.dash-perf-section-hdr {
+	display: flex;
+	align-items: center;
+	font-size: .8rem;
+	padding: 7px 0 5px;
+	border-bottom: 1px solid;
+	width: 100%;
+}
+body:not(.dark-mode) .dash-perf-section-hdr { border-color: #dde3ea; }
+.dark-mode            .dash-perf-section-hdr { border-color: rgba(255,255,255,.08); }
+
+/* JS-cloned instance rows */
+#perf_per_instance_data_holder .row { font-size: .84rem; }
+
+/* ── Component / discovery tables ────────────────────────── */
+/*
+   JS writes rows with class="row border-bottom hyperhdr-vcenter"
+   directly into #tab_components and #device_discovery_container.
+   We wrap them in .dash-comp-table and style from outside.
+*/
+.dash-comp-table .row       { margin: 0; }
+.dash-comp-table .row.border-bottom {
+	padding: 0 16px;
+	min-height: 46px;
+	transition: background .13s;
+}
+.dash-comp-table .row.border-bottom:hover { background: rgba(59,158,221,.05) !important; }
+
+body:not(.dark-mode) .dash-comp-table .row.border-bottom { border-color: #edf1f6 !important; }
+.dark-mode            .dash-comp-table .row.border-bottom { border-color: rgba(255,255,255,.06) !important; }
+
+/* Header row inside tables */
+.dash-comp-table .row.text-primary {
+	font-size: .74rem;
+	font-weight: 700;
+	letter-spacing: .05em;
+	text-transform: uppercase;
+	min-height: 38px;
+}
+body:not(.dark-mode) .dash-comp-table .row.text-primary { background: #f7fafd; }
+.dark-mode            .dash-comp-table .row.text-primary { background: rgba(255,255,255,.03); }
+
+/* Component on/off SVG sizing */
+.dash-comp-table svg.svg4hyperhdr.top-0 {
+	width: 18px !important;
+	height: 18px !important;
+	top: 0 !important;
+	padding: 0 !important;
+}
+
+/* ── Sites list ───────────────────────────────────────────── */
+.dash-sites-list        { display: flex; flex-direction: column; gap: 6px; }
+
+.dash-site-row {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	padding: 11px 12px;
+	border-radius: 10px;
+	text-decoration: none !important;
+	border: 1px solid transparent;
+	transition: background .16s, transform .16s, border-color .16s;
+}
+body:not(.dark-mode) .dash-site-row { border-color: #eaeff5; }
+.dark-mode            .dash-site-row { border-color: rgba(255,255,255,.07); }
+
+.dash-site-row:hover { transform: translateX(4px); }
+body:not(.dark-mode) .dash-site-row:hover { background: #eef5ff; border-color: #c5d9f5; }
+.dark-mode            .dash-site-row:hover { background: rgba(99,179,237,.08); border-color: rgba(99,179,237,.22); }
+
+.dash-site-icon-wrap {
+	width: 44px; height: 44px;
+	border-radius: 10px;
+	display: flex; align-items: center; justify-content: center;
+	flex-shrink: 0;
+}
+body:not(.dark-mode) .dash-site-icon-wrap { background: #f0f4f9; }
+.dark-mode            .dash-site-icon-wrap { background: rgba(255,255,255,.06); }
+.dash-site-icon-wrap svg { margin: 0; }
+
+.dash-site-text      { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.dash-site-name      { font-size: .86rem; font-weight: 600; }
+.dash-site-sub       { font-size: .73rem; opacity: .5; }
+.dash-site-arrow     { flex-shrink: 0; opacity: .32; transition: opacity .16s; }
+.dash-site-row:hover .dash-site-arrow { opacity: .65; }
+
+</style>
+
+<script>
+	$.getScript("/js/overview.js");
+</script>
