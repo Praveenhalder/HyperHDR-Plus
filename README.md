@@ -7,12 +7,19 @@
 - Added a **Color Calibration Tool** for precise LED color tuning.
 - Adjust **Red**, **Green**, **Blue**, **Brightness**, and **Gamma** values.
 - Improves color accuracy between screen capture and LEDs.
+
+<img width="945" height="792" alt="Screenshot 2026-02-27 154448" src="https://github.com/user-attachments/assets/c4bfe847-6cc3-45d7-a572-9ae6519284e0" />
+
+
 - Helps achieve better visual consistency and ambience.
 
 ### 📁 Presets Manager
 - Added a **Presets Manager** for quick configuration switching.
 - Save and load multiple lighting setups instantly.
 - Easily manage presets for games, movies, or different environments.
+
+<img width="306" height="243" alt="Screenshot 2026-02-27 154709" src="https://github.com/user-attachments/assets/fa226624-09fb-4120-be98-a7f64d702b95" />
+
 
 ### 🖥️ UI Changes
 - Updated UI with a cleaner and more modern design.
