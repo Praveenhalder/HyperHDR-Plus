@@ -407,7 +407,17 @@ svg[data-id]                { max-height: none !important; }
 					</li>
 					<li class="nav-item">																	
 						<a href="#processing" class="nav-link system-link"><svg data-src="svg/image_processing.svg" fill="currentColor" class="svg4hyperhdr leftmenu"></svg><p data-i18n="main_menu_colors_conf_token">Image Processing</p></a>
-					</li>					
+					</li>
+					<li class="nav-item" id="btn_color_calibration">
+						<a href="#color_calibration" class="nav-link system-link">
+							<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="svg4hyperhdr leftmenu" viewBox="0 0 24 24" style="max-height:20px;">
+								<circle cx="12" cy="12" r="3" fill="none" stroke="currentColor" stroke-width="2"/>
+								<path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 18a8 8 0 1 1 8-8 8 8 0 0 1-8 8z" opacity=".4"/>
+								<path d="M12 6a6 6 0 0 1 6 6h-2a4 4 0 0 0-4-4V6z" fill="currentColor"/>
+							</svg>
+							<p>Color Calibration</p>
+						</a>
+					</li>
 					<li class="nav-item">																	
 						<a href="#remote" class="nav-link system-link"><svg data-src="svg/remote_control.svg" fill="currentColor" class="svg4hyperhdr leftmenu"></svg><p data-i18n="main_menu_remotecontrol_token">Remote Control</p></a>
 					</li>
@@ -649,6 +659,56 @@ svg[data-id]                { max-height: none !important; }
         <!-- Presets -->
         <script src="js/presets.js"></script>
 
+        <!-- Color Calibration -->
+        <script>
+        (function () {
+            // Handle #color_calibration hash navigation
+            function loadColorCalibration() {
+                var subpage = document.getElementById('hyper-subpage') || document.getElementById('page-content');
+                if (!subpage) return;
+
+                // Load the subpage via fetch into the container
+                fetch('content/color_calibration.html')
+                    .then(function(r) { return r.text(); })
+                    .then(function(html) {
+                        // Extract body content
+                        var tmp = document.createElement('div');
+                        tmp.innerHTML = html;
+                        var body = tmp.querySelector('body');
+                        subpage.innerHTML = body ? body.innerHTML : tmp.innerHTML;
+
+                        // Re-inject the calibration script
+                        var sc = document.createElement('script');
+                        sc.src = 'js/color_calibration.js';
+                        sc.id  = 'color_cal_script';
+                        document.body.appendChild(sc);
+                    })
+                    .catch(function(e) {
+                        subpage.innerHTML = '<div style="padding:30px; color:#fc8181;">⚠️ Could not load color_calibration.html – ' + e.message + '</div>';
+                    });
+            }
+
+            // Hook into AdminLTE / HyperHDR routing
+            function checkHash() {
+                if (window.location.hash === '#color_calibration') {
+                    loadColorCalibration();
+                }
+            }
+
+            window.addEventListener('hashchange', checkHash);
+            document.addEventListener('DOMContentLoaded', function() {
+                // Also intercept sidebar click
+                var btn = document.getElementById('btn_color_calibration');
+                if (btn) {
+                    btn.querySelector('a').addEventListener('click', function(e) {
+                        // Give the hash a moment to set, then load
+                        setTimeout(loadColorCalibration, 50);
+                    });
+                }
+                checkHash();
+            });
+        })();
+        </script>
 
     </body>
 </html>
