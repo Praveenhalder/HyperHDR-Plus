@@ -121,7 +121,14 @@ if (USE_CCACHE_CACHING)
 endif(USE_CCACHE_CACHING)
 
 # find QT libs
-find_package(Qt6 COMPONENTS Core Network SerialPort QUIET)
+find_package(Qt6 COMPONENTS
+    Core
+    Network
+    SerialPort
+    Widgets
+    WebEngineWidgets
+    REQUIRED
+)
 
 if (Qt6Core_FOUND AND NOT (DO_NOT_USE_QT_VERSION_6_LIBS STREQUAL "ON"))	
 	message( STATUS "Found Qt Version: ${Qt6Core_VERSION}" )

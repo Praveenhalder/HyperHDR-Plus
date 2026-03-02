@@ -36,6 +36,7 @@
 #include <base/HyperHdrManager.h>
 #include <systray/Systray.h>
 class HyperHdrDaemon;
+class UiLauncher;
 
 
 class SystrayHandler : public QObject
@@ -43,7 +44,7 @@ class SystrayHandler : public QObject
 	Q_OBJECT
 
 public:
-	SystrayHandler(HyperHdrDaemon* hyperhdrDaemon, quint16 webPort, QString rootFolder);
+	SystrayHandler(HyperHdrDaemon* hyperhdrDaemon, quint16 webPort, QString rootFolder, UiLauncher* uiLauncher = nullptr);
 	~SystrayHandler();
 	bool isInitialized();
 
@@ -73,5 +74,6 @@ private:
 	quint16							_webPort;
 	QString							_rootFolder;
 	int								_selectedInstance;
+	UiLauncher*						_uiLauncher;
 };
 

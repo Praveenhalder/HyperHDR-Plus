@@ -43,6 +43,7 @@
 #include <QBuffer>
 #include <QByteArray>
 #include <QCoreApplication>
+#include <QDesktopServices>
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
@@ -60,6 +61,7 @@
 
 #include "HyperHdrDaemon.h"
 #include "SystrayHandler.h"
+#include "UiLauncher.h"
 
 #ifdef __linux__
 #define SYSTRAY_WIDGET_LIB "libsystray-widget.so"
@@ -75,13 +77,14 @@ namespace
 }
 #endif
 
-SystrayHandler::SystrayHandler(HyperHdrDaemon* hyperhdrDaemon, quint16 webPort, QString rootFolder)
+SystrayHandler::SystrayHandler(HyperHdrDaemon* hyperhdrDaemon, quint16 webPort, QString rootFolder, UiLauncher* uiLauncher)
 	: QObject(),
 	_menu(nullptr),
 	_haveSystray(false),
 	_webPort(webPort),
 	_rootFolder(rootFolder),
-	_selectedInstance(-1)
+	_selectedInstance(-1),
+	_uiLauncher(uiLauncher)
 {
 	Q_INIT_RESOURCE(resources);
 
@@ -448,7 +451,10 @@ void SystrayHandler::createSystray()
 bool SystrayHandler::getCurrentAutorunState()
 {	
 	QSettings reg("HKEY_CURRENT_USER\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat);
-	return reg.value("Hyperhdr", 0).toString() == qApp->applicationFilePath().replace('/', '\\');
+	QString regValue = reg.value("Hyperhdr", 0).toString();
+	QString exePath = qApp->applicationFilePath().replace('/', '\\');
+	// Check against both with and without --minimized flag
+	return regValue == exePath || regValue == exePath + " --minimized";
 }
 #endif
 
@@ -459,7 +465,7 @@ void SystrayHandler::setAutorunState()
 		QSettings reg("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run", QSettings::NativeFormat);
 		(currentState)
 			? reg.remove("Hyperhdr")
-			: reg.setValue("Hyperhdr", qApp->applicationFilePath().replace('/', '\\'));
+			: reg.setValue("Hyperhdr", qApp->applicationFilePath().replace('/', '\\') + " --minimized");
 		QUEUE_CALL_0(this, createSystray);
 	#endif
 }
@@ -479,62 +485,15 @@ void SystrayHandler::setColor(ColorRgb color)
 
 void SystrayHandler::settings()
 {
-#ifndef _WIN32
-	// Hide error messages when opening webbrowser
-
-	int out_pipe[2];
-	int saved_stdout;
-	int saved_stderr;
-
-	// saving stdout and stderr file descriptor
-	saved_stdout = ::dup(STDOUT_FILENO);
-	saved_stderr = ::dup(STDERR_FILENO);
-
-	if (::pipe(out_pipe) == 0)
+	if (_uiLauncher != nullptr)
 	{
-		// redirecting stdout to pipe
-		::dup2(out_pipe[1], STDOUT_FILENO);
-		::close(out_pipe[1]);
-		// redirecting stderr to stdout
-		::dup2(STDOUT_FILENO, STDERR_FILENO);
+		_uiLauncher->show();
 	}
-#endif
-
-	QString link = QString("http://localhost:%1/").arg(_webPort);
-
-#ifdef _WIN32
-	const wchar_t* array = (const wchar_t*)link.utf16();
-	ShellExecuteW(0, 0, array, 0, 0, SW_SHOW);
-#endif
-
-#ifdef __linux__
-	QString command = QString("xdg-open %1").arg(link);
-	QByteArray commandUtf8 = command.toUtf8();
-	if (system((commandUtf8.constData())) == -1)
+	else
 	{
-		printf("xdg-open <http_link> failed. xdg-utils package is required.\n");
+		QString link = QString("http://localhost:%1/").arg(_webPort);
+		QDesktopServices::openUrl(QUrl(link));
 	}
-#endif
-	
-#ifdef __APPLE__
-	std::string slink = link.toStdString();
-	CFURLRef url = CFURLCreateWithBytes(
-		NULL,                       
-		(UInt8*)slink.c_str(),
-		slink.length(),
-		kCFStringEncodingASCII,
-		NULL
-	);
-	LSOpenCFURLRef(url, 0);
-	CFRelease(url);
-#endif
-
-#ifndef _WIN32
-	// restoring stdout
-	::dup2(saved_stdout, STDOUT_FILENO);
-	// restoring stderr
-	::dup2(saved_stderr, STDERR_FILENO);
-#endif
 }
 
 void SystrayHandler::setEffect(QString effect)

@@ -65,26 +65,33 @@ button.btn>svg.svg4hyperhdr { max-height: 1.2em; }
 svg.svg4hyperhdr.leftmenu   { max-height: 20px; }
 svg[data-id]                { max-height: none !important; }
 
+/* ── Bottom-menu toolbar icon size override ───────── */
+.col.bottom-menu svg.svg4hyperhdr,
+.main-sidebar .bottom-menu svg.svg4hyperhdr {
+    width: 16px !important;
+    height: 16px !important;
+    max-height: 16px !important;
+    max-width: 16px !important;
+    margin-right: 0 !important;
+}
+
 /* ══════════════════════════════════════════════
-   MODERN SIDEBAR
+   MODERN SIDEBAR — shared / structural
 ══════════════════════════════════════════════ */
 
 /* Shell */
 .main-sidebar {
-    background: linear-gradient(180deg, #1a1f2e 0%, #151922 100%) !important;
     border-right: none !important;
-    box-shadow: 4px 0 28px rgba(0,0,0,.4) !important;
 }
 
 /* Scrollbar */
-.sidebar { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.1) transparent; }
+.sidebar { scrollbar-width: thin; scrollbar-color: rgba(128,128,128,.2) transparent; }
 .sidebar::-webkit-scrollbar { width: 3px; }
 .sidebar::-webkit-scrollbar-track { background: transparent; }
-.sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 4px; }
+.sidebar::-webkit-scrollbar-thumb { border-radius: 4px; }
 
 /* Logo area */
 .brand-link.logo-switch {
-    border-bottom: 1px solid rgba(255,255,255,.06) !important;
     padding-bottom: 12px !important;
 }
 
@@ -103,27 +110,21 @@ svg[data-id]                { max-height: none !important; }
     height: 36px;
     border-radius: 10px;
     cursor: pointer;
+    overflow: hidden;
     transition: background .18s, transform .15s;
-    color: rgba(255,255,255,.5) !important;
-    fill: rgba(255,255,255,.5) !important;
 }
 .main-sidebar .bottom-menu a:hover,
 .main-sidebar .bottom-menu svg.top-left-menu:hover {
-    background: rgba(255,255,255,.1);
-    color: #fff !important;
-    fill: #fff !important;
     transform: scale(1.12);
 }
 
 /* Divider */
 .main-sidebar .dropdown-divider {
-    border-color: rgba(255,255,255,.07) !important;
     margin: 6px 14px !important;
 }
 
 /* Nav links base */
 .nav-sidebar .nav-link {
-    color: rgba(255,255,255,.6) !important;
     font-size: .8rem;
     font-weight: 500;
     letter-spacing: .01em;
@@ -134,7 +135,6 @@ svg[data-id]                { max-height: none !important; }
     border-left: 3px solid transparent;
 }
 .nav-sidebar .nav-link p {
-    color: rgba(255,255,255,.6) !important;
     transition: color .18s;
     margin-bottom: 0;
 }
@@ -144,32 +144,14 @@ svg[data-id]                { max-height: none !important; }
     flex-shrink: 0;
     transition: opacity .18s, transform .18s;
 }
-
-/* Hover */
-.nav-sidebar .nav-link:hover {
-    background: rgba(255,255,255,.07) !important;
-    color: rgba(255,255,255,.95) !important;
-}
-.nav-sidebar .nav-link:hover p {
-    color: rgba(255,255,255,.95) !important;
-}
 .nav-sidebar .nav-link:hover svg.svg4hyperhdr.leftmenu {
     opacity: 1;
     transform: translateX(2px);
 }
 
 /* Active */
-.nav-sidebar .nav-link.active,
-.nav-sidebar > .nav-item > .nav-link.active {
-    background: rgba(99,179,237,.12) !important;
-    color: #63b3ed !important;
-    border-left: 3px solid #63b3ed;
-    padding-left: 9px !important;
-}
-.nav-sidebar .nav-link.active p        { color: #63b3ed !important; }
 .nav-sidebar .nav-link.active svg.svg4hyperhdr.leftmenu {
     opacity: 1;
-    filter: drop-shadow(0 0 5px rgba(99,179,237,.55));
 }
 
 /* Treeview children */
@@ -191,7 +173,110 @@ svg[data-id]                { max-height: none !important; }
     opacity: .65;
 }
 
-/* ── Presets submenu panel ────────────────────── */
+/* ══════════════════════════════════════════════
+   MODERN SIDEBAR — DARK MODE
+══════════════════════════════════════════════ */
+body.dark-mode .main-sidebar {
+    background: linear-gradient(180deg, #1a1f2e 0%, #151922 100%) !important;
+    box-shadow: 4px 0 28px rgba(0,0,0,.4) !important;
+}
+body.dark-mode .sidebar { scrollbar-color: rgba(255,255,255,.1) transparent; }
+body.dark-mode .sidebar::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); }
+body.dark-mode .brand-link.logo-switch {
+    border-bottom: 1px solid rgba(255,255,255,.06) !important;
+}
+body.dark-mode .main-sidebar .bottom-menu a,
+body.dark-mode .main-sidebar .bottom-menu svg.top-left-menu {
+    color: rgba(255,255,255,.5) !important;
+    fill: rgba(255,255,255,.5) !important;
+}
+body.dark-mode .main-sidebar .bottom-menu a:hover,
+body.dark-mode .main-sidebar .bottom-menu svg.top-left-menu:hover {
+    background: rgba(255,255,255,.1);
+    color: #fff !important;
+    fill: #fff !important;
+}
+body.dark-mode .main-sidebar .dropdown-divider {
+    border-color: rgba(255,255,255,.07) !important;
+}
+body.dark-mode .nav-sidebar .nav-link {
+    color: rgba(255,255,255,.6) !important;
+}
+body.dark-mode .nav-sidebar .nav-link p {
+    color: rgba(255,255,255,.6) !important;
+}
+body.dark-mode .nav-sidebar .nav-link:hover {
+    background: rgba(255,255,255,.07) !important;
+    color: rgba(255,255,255,.95) !important;
+}
+body.dark-mode .nav-sidebar .nav-link:hover p {
+    color: rgba(255,255,255,.95) !important;
+}
+body.dark-mode .nav-sidebar .nav-link.active,
+body.dark-mode .nav-sidebar > .nav-item > .nav-link.active {
+    background: rgba(99,179,237,.12) !important;
+    color: #63b3ed !important;
+    border-left: 3px solid #63b3ed;
+    padding-left: 9px !important;
+}
+body.dark-mode .nav-sidebar .nav-link.active p { color: #63b3ed !important; }
+body.dark-mode .nav-sidebar .nav-link.active svg.svg4hyperhdr.leftmenu {
+    filter: drop-shadow(0 0 5px rgba(99,179,237,.55));
+}
+
+/* ══════════════════════════════════════════════
+   MODERN SIDEBAR — LIGHT / WHITE MODE
+══════════════════════════════════════════════ */
+body:not(.dark-mode) .main-sidebar {
+    background: linear-gradient(180deg, #ffffff 0%, #f0f4f9 100%) !important;
+    box-shadow: 4px 0 20px rgba(0,0,0,.08) !important;
+}
+body:not(.dark-mode) .sidebar { scrollbar-color: rgba(0,0,0,.12) transparent; }
+body:not(.dark-mode) .sidebar::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); }
+body:not(.dark-mode) .brand-link.logo-switch {
+    border-bottom: 1px solid rgba(0,0,0,.07) !important;
+}
+body:not(.dark-mode) .main-sidebar .bottom-menu a,
+body:not(.dark-mode) .main-sidebar .bottom-menu svg.top-left-menu {
+    color: rgba(30,36,48,.45) !important;
+    fill: rgba(30,36,48,.45) !important;
+}
+body:not(.dark-mode) .main-sidebar .bottom-menu a:hover,
+body:not(.dark-mode) .main-sidebar .bottom-menu svg.top-left-menu:hover {
+    background: rgba(0,0,0,.07);
+    color: #1e2430 !important;
+    fill: #1e2430 !important;
+}
+body:not(.dark-mode) .main-sidebar .dropdown-divider {
+    border-color: rgba(0,0,0,.08) !important;
+}
+body:not(.dark-mode) .nav-sidebar .nav-link {
+    color: rgba(30,36,48,.6) !important;
+}
+body:not(.dark-mode) .nav-sidebar .nav-link p {
+    color: rgba(30,36,48,.6) !important;
+}
+body:not(.dark-mode) .nav-sidebar .nav-link:hover {
+    background: rgba(0,0,0,.05) !important;
+    color: #1e2430 !important;
+}
+body:not(.dark-mode) .nav-sidebar .nav-link:hover p {
+    color: #1e2430 !important;
+}
+body:not(.dark-mode) .nav-sidebar .nav-link.active,
+body:not(.dark-mode) .nav-sidebar > .nav-item > .nav-link.active {
+    background: rgba(59,158,221,.1) !important;
+    color: #1074b1 !important;
+    border-left: 3px solid #1074b1;
+    padding-left: 9px !important;
+}
+body:not(.dark-mode) .nav-sidebar .nav-link.active p { color: #1074b1 !important; }
+body:not(.dark-mode) .nav-sidebar .nav-link.active svg.svg4hyperhdr.leftmenu {
+    filter: drop-shadow(0 0 4px rgba(59,158,221,.4));
+}
+
+
+/* ── Presets panel — structural (shared) ──────────── */
 #presets_submenu            { display: none; }
 #presets_submenu.open       { display: block; }
 
@@ -201,7 +286,6 @@ svg[data-id]                { max-height: none !important; }
     box-sizing: border-box;
 }
 
-/* Preset input row */
 #presets_submenu .preset-toolbar {
     display: flex;
     flex-wrap: nowrap;
@@ -210,10 +294,8 @@ svg[data-id]                { max-height: none !important; }
     box-sizing: border-box;
     margin-top: 8px;
 }
+
 #preset_name_input {
-    background: rgba(255,255,255,.07) !important;
-    border: 1px solid rgba(255,255,255,.12) !important;
-    color: rgba(255,255,255,.85) !important;
     border-radius: 7px !important;
     font-size: .75rem !important;
     height: 28px !important;
@@ -222,15 +304,7 @@ svg[data-id]                { max-height: none !important; }
     width: 0;
     transition: border-color .18s, background .18s;
 }
-#preset_name_input::placeholder { color: rgba(255,255,255,.3) !important; }
-#preset_name_input:focus {
-    background: rgba(255,255,255,.11) !important;
-    border-color: rgba(99,179,237,.5) !important;
-    box-shadow: 0 0 0 2px rgba(99,179,237,.15) !important;
-    outline: none;
-}
 
-/* Preset action buttons */
 #btn_save_preset,
 #btn_import_preset,
 #btn_export_preset {
@@ -245,35 +319,28 @@ svg[data-id]                { max-height: none !important; }
     border: none !important;
     transition: filter .18s, transform .15s;
 }
-#btn_save_preset   { background: rgba(72,187,120,.8) !important; }
-#btn_import_preset { background: rgba(66,153,225,.8) !important; }
-#btn_export_preset { background: rgba(113,128,150,.7) !important; }
-#btn_save_preset:hover   { filter: brightness(1.15); transform: scale(1.08); }
-#btn_import_preset:hover { filter: brightness(1.15); transform: scale(1.08); }
+#btn_save_preset:hover,
+#btn_import_preset:hover,
 #btn_export_preset:hover { filter: brightness(1.15); transform: scale(1.08); }
 
-/* Preset list scroll area */
 #presets_list_container {
     max-height: 190px;
     overflow-y: auto;
     overflow-x: hidden;
     width: 100%;
     scrollbar-width: thin;
-    scrollbar-color: rgba(255,255,255,.1) transparent;
 }
 #presets_list_container::-webkit-scrollbar { width: 3px; }
-#presets_list_container::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); border-radius: 3px; }
+#presets_list_container::-webkit-scrollbar-thumb { border-radius: 3px; }
 
 #presets_list_container:empty::after {
     content: 'No presets yet.';
     font-size: .72rem;
-    color: rgba(255,255,255,.3);
     display: block;
     padding: 6px 2px;
     font-style: italic;
 }
 
-/* Individual preset row */
 .preset-item {
     display: flex;
     align-items: center;
@@ -286,28 +353,22 @@ svg[data-id]                { max-height: none !important; }
     transition: background .15s;
     border: 1px solid transparent;
 }
-.preset-item:hover {
-    background: rgba(255,255,255,.08);
-    border-color: rgba(255,255,255,.06);
-}
+
 .preset-label {
     font-size: .78rem;
     font-weight: 500;
-    color: rgba(255,255,255,.8);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     flex: 1;
     min-width: 0;
 }
-.preset-item:hover .preset-label { color: #fff; }
 
 .btn-del-preset {
     flex-shrink: 0;
     background: none;
     border: none;
     padding: 0 3px;
-    color: rgba(255,255,255,.25);
     line-height: 1;
     cursor: pointer;
     font-size: .75rem;
@@ -317,6 +378,110 @@ svg[data-id]                { max-height: none !important; }
 .btn-del-preset:hover {
     color: #fc8181;
     background: rgba(252,129,129,.1);
+}
+
+/* ── Presets panel — DARK MODE ────────────────────── */
+body.dark-mode #preset_name_input {
+    background: rgba(255,255,255,.07) !important;
+    border: 1px solid rgba(255,255,255,.12) !important;
+    color: rgba(255,255,255,.85) !important;
+}
+body.dark-mode #preset_name_input::placeholder { color: rgba(255,255,255,.3) !important; }
+body.dark-mode #preset_name_input:focus {
+    background: rgba(255,255,255,.11) !important;
+    border-color: rgba(99,179,237,.5) !important;
+    box-shadow: 0 0 0 2px rgba(99,179,237,.15) !important;
+    outline: none;
+}
+body.dark-mode #btn_save_preset   { background: rgba(72,187,120,.8) !important; }
+body.dark-mode #btn_import_preset { background: rgba(66,153,225,.8) !important; }
+body.dark-mode #btn_export_preset { background: rgba(113,128,150,.7) !important; }
+
+body.dark-mode #presets_list_container {
+    scrollbar-color: rgba(255,255,255,.1) transparent;
+}
+body.dark-mode #presets_list_container::-webkit-scrollbar-thumb { background: rgba(255,255,255,.15); }
+body.dark-mode #presets_list_container:empty::after { color: rgba(255,255,255,.3); }
+
+body.dark-mode .preset-item:hover {
+    background: rgba(255,255,255,.08);
+    border-color: rgba(255,255,255,.06);
+}
+body.dark-mode .preset-label { color: rgba(255,255,255,.8); }
+body.dark-mode .preset-item:hover .preset-label { color: #fff; }
+body.dark-mode .btn-del-preset { color: rgba(255,255,255,.25); }
+
+/* ── Presets panel — LIGHT / WHITE MODE ──────────── */
+body:not(.dark-mode) #preset_name_input {
+    background: rgba(0,0,0,.04) !important;
+    border: 1px solid rgba(0,0,0,.15) !important;
+    color: #1e2430 !important;
+}
+body:not(.dark-mode) #preset_name_input::placeholder { color: rgba(30,36,48,.35) !important; }
+body:not(.dark-mode) #preset_name_input:focus {
+    background: #fff !important;
+    border-color: rgba(16,116,177,.5) !important;
+    box-shadow: 0 0 0 2px rgba(16,116,177,.12) !important;
+    outline: none;
+}
+body:not(.dark-mode) #btn_save_preset   { background: rgba(34,163,74,.85) !important; }
+body:not(.dark-mode) #btn_import_preset { background: rgba(16,116,177,.85) !important; }
+body:not(.dark-mode) #btn_export_preset { background: rgba(100,116,139,.75) !important; }
+
+body:not(.dark-mode) #presets_list_container {
+    scrollbar-color: rgba(0,0,0,.12) transparent;
+}
+body:not(.dark-mode) #presets_list_container::-webkit-scrollbar-thumb { background: rgba(0,0,0,.15); }
+body:not(.dark-mode) #presets_list_container:empty::after { color: rgba(30,36,48,.35); }
+
+body:not(.dark-mode) .preset-item:hover {
+    background: rgba(0,0,0,.05);
+    border-color: rgba(0,0,0,.07);
+}
+body:not(.dark-mode) .preset-label { color: rgba(30,36,48,.75); }
+body:not(.dark-mode) .preset-item:hover .preset-label { color: #1e2430; }
+body:not(.dark-mode) .btn-del-preset { color: rgba(30,36,48,.25); }
+
+/* ── Sidebar full-height scroll fix ──────────────── */
+.main-sidebar {
+    display: flex !important;
+    flex-direction: column !important;
+    height: 100vh !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    overflow: hidden !important;
+}
+
+.main-sidebar .sidebar {
+    flex: 1 1 0 !important;      /* grow AND shrink, base = 0 */
+    min-height: 0 !important;    /* CRITICAL — lets flex child shrink below content */
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    height: auto !important;     /* don't let AdminLTE force a fixed height */
+    padding-bottom: 16px;
+}
+
+/* Scrollbar always visible when content overflows */
+.main-sidebar .sidebar {
+    scrollbar-width: thin !important;
+    scrollbar-color: rgba(128,128,128,.3) transparent !important;
+}
+.main-sidebar .sidebar::-webkit-scrollbar {
+    width: 4px !important;
+    display: block !important;
+}
+.main-sidebar .sidebar::-webkit-scrollbar-track {
+    background: transparent !important;
+}
+.main-sidebar .sidebar::-webkit-scrollbar-thumb {
+    border-radius: 4px !important;
+}
+body.dark-mode .main-sidebar .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,.2) !important;
+}
+body:not(.dark-mode) .main-sidebar .sidebar::-webkit-scrollbar-thumb {
+    background: rgba(0,0,0,.18) !important;
 }
 
 </style>
@@ -337,12 +502,6 @@ svg[data-id]                { max-height: none !important; }
 			</noscript>
 			
 			
-			<a href="#" id="main-window-button-menu" class="nav-link" data-widget="pushmenu" role="button" style = "position: fixed; top: 0; right: 0px; z-index: 200">			
-				<div class="icon-menu-control pt-3 pe-3">					
-					<svg id="showMenuIcon" data-src="svg/left_menu_hide.svg" fill="currentColor" style="width:64px; height:64px; position:absolute; left:-64px; opacity: 1; transition: opacity 0.5s;"></svg>
-					<svg id="hideMenuIcon" data-src="svg/left_menu_show.svg" fill="currentColor" style="width:64px; height:64px; position:absolute; left:-64px; opacity: 0; transition: opacity 0.5s;"></svg>
-				</div>			
-			</a>
   
 			<div id="loading_overlay" class="overlay"></div>
 			
@@ -381,6 +540,13 @@ svg[data-id]                { max-height: none !important; }
 										<svg aria-hidden="true" data-src="svg/television.svg" fill="currentColor" class="svg4hyperhdr leftmenu top-left-menu"></svg>
 									</a>
 								</div>
+								<!-- TEMP: wizard test button – remove when done -->
+								<div class="col bottom-menu ps-0 pe-0">
+									<a id="btn_test_wizard" title="Re-open Setup Wizard" style="cursor:pointer;">
+										<svg aria-hidden="true" data-src="svg/wizard.svg" fill="currentColor" class="svg4hyperhdr leftmenu top-left-menu"></svg>
+									</a>
+								</div>
+								<!-- END TEMP -->
 								<div class="col bottom-menu ps-0 pe-0">
 									<a id="btn_lock_ui">
 										<svg aria-hidden="true" data-src="svg/logout.svg" fill="currentColor" class="svg4hyperhdr leftmenu top-left-menu"></svg>
@@ -658,6 +824,20 @@ svg[data-id]                { max-height: none !important; }
 
         <!-- Presets -->
         <script src="js/presets.js"></script>
+        <script src="js/setup_wizard.js"></script>
+        <!-- TEMP: wizard test button listener – remove with btn_test_wizard -->
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var btn = document.getElementById('btn_test_wizard');
+            if (btn) {
+                btn.addEventListener('click', function() {
+                    localStorage.removeItem('hyperhdr_wizard_done');
+                    location.reload();
+                });
+            }
+        });
+        </script>
+        <!-- END TEMP -->
 
         <!-- Color Calibration -->
         <script>

@@ -3,7 +3,10 @@
 
 	#include <QByteArray>
 	#include <QBuffer>
+	#include <QApplication>
+	#include <QCoreApplication>
 	#include <QDateTime>
+	#include <QDesktopServices>
 	#include <QDir>
 	#include <QFile>
 	#include <QFileInfo>

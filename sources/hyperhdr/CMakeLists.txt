@@ -2,20 +2,31 @@
 if (WIN32)
 	include(win_rc)
 	generate_win_rc_file(hyperhdr)
+	generate_win_rc_file(hyperhdr-ui)
 endif()
 
 add_executable(hyperhdr
 	HyperHdrDaemon.h
 	SystrayHandler.h
+	UiLauncher.h
 	HyperHdrDaemon.cpp
 	SystrayHandler.cpp
 	main.cpp
 	${hyperhdr_WIN_RC_PATH}
 )
 
-# promote hyperhdr as GUI app
+# Separate UI process — all WebEngine/Chromium code lives here.
+# Spawned by hyperhdr.exe on demand, exits when window closed → zero RAM when not in use.
+# No PCH used here since it has its own Qt includes.
+add_executable(hyperhdr-ui
+	hyperhdr-ui-main.cpp
+	${hyperhdr-ui_WIN_RC_PATH}
+)
+
+# promote both as GUI apps on Windows
 if (WIN32)
 	target_link_options(hyperhdr PUBLIC /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup)
+	target_link_options(hyperhdr-ui PUBLIC /SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup)
 endif()
 
 target_link_libraries(hyperhdr
@@ -43,7 +54,16 @@ target_link_libraries(hyperhdr
 	suspend-handler
 	utils-image
 	webserver
+	Qt6::Widgets
 	${APPKIT_FRAMEWORK}
+)
+
+# hyperhdr-ui only needs WebEngine + resources (for icon)
+target_link_libraries(hyperhdr-ui
+	Qt6::Core
+	Qt6::Widgets
+	Qt6::WebEngineWidgets
+	resources
 )
 
 if (WIN32 OR APPLE)
@@ -145,10 +165,25 @@ include(${OUR_CMAKE_MODULES}/../installers.cmake)
 
 if (APPLE)
 	DeployApple("hyperhdr")
+	DeployApple("hyperhdr-ui")
 elseif (NOT WIN32) # Unix
 	DeployUnix("hyperhdr")
+	DeployUnix("hyperhdr-ui")
 elseif(WIN32) # Windows
 	DeployWindows("hyperhdr")
+	DeployWindows("hyperhdr-ui")
+
+	# Run windeployqt with --webengine flag so Qt6WebEngineCore/Widgets DLLs
+	# and QtWebEngineProcess.exe are copied next to hyperhdr-ui.exe
+	find_program(WINDEPLOYQT windeployqt HINTS "${Qt6_DIR}/../../../bin")
+	if (WINDEPLOYQT)
+		add_custom_command(TARGET hyperhdr-ui POST_BUILD
+			COMMAND ${WINDEPLOYQT}
+				--no-translations
+				$<TARGET_FILE:hyperhdr-ui>
+			COMMENT "Deploying Qt WebEngine for hyperhdr-ui..."
+		)
+	endif()
 endif ()
 
 if(USE_PRECOMPILED_HEADERS AND COMMAND target_precompile_headers AND WIN32)

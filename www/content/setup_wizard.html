@@ -1,0 +1,437 @@
+<!-- ═══════════════════════════════════════════════════════════
+     HYPERHDR SETUP WIZARD  –  setup_wizard.html
+     Place in: webconfig/content/setup_wizard.html
+     CSS loaded by: js/setup_wizard.js
+     JS loaded by:  index.html  <script src="js/setup_wizard.js">
+════════════════════════════════════════════════════════════ -->
+
+<div id="setup-wizard-overlay" class="wiz-dark">
+
+  <!-- animated background -->
+  <div class="wiz-bg-mesh"></div>
+
+  <!-- ── Top bar ──────────────────────────────────────────── -->
+  <div class="wiz-topbar">
+    <div class="wiz-logo">
+      <img src="/img/hyperhdr/hyperhdrwhitelogo.png" alt="HyperHDR" id="wiz-logo-img" />
+      <span class="wiz-logo-text">Setup Wizard</span>
+    </div>
+    <div class="wiz-topbar-right">
+      <span class="wiz-mode-icon" id="wiz-mode-icon-left">🌙</span>
+      <div class="wiz-mode-toggle" id="wiz-mode-toggle" title="Toggle light / dark mode"></div>
+      <span class="wiz-mode-icon" id="wiz-mode-icon-right">☀️</span>
+    </div>
+  </div>
+
+  <!-- ── Step progress ────────────────────────────────────── -->
+  <div class="wiz-progress-wrap" id="wiz-progress">
+    <!-- populated by JS -->
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       STEP 0 — Welcome / Entry
+  ════════════════════════════════════════════════════════ -->
+  <div class="wiz-body">
+
+    <div class="wiz-pane active" id="wiz-pane-0">
+      <div class="wiz-pane-scroll" style="justify-content:center;">
+        <div style="text-align:center;margin-bottom:36px;">
+          <div class="wiz-complete-icon" style="background:rgba(79,156,249,.12);border-color:var(--wiz-accent);">⚡</div>
+          <div class="wiz-pane-title">Welcome to HyperHDR</div>
+          <div class="wiz-pane-sub">Let's get your ambient lighting set up in a few easy steps.</div>
+        </div>
+        <div class="wiz-choices">
+          <div class="wiz-choice-card" id="wiz-choice-setup">
+            <div class="wiz-choice-icon">🔧</div>
+            <div class="wiz-choice-title">Start LED Setup</div>
+            <div class="wiz-choice-desc">Configure your LED controller, capture device, and LED layout from scratch.</div>
+          </div>
+          <div class="wiz-choice-card" id="wiz-choice-backup">
+            <div class="wiz-choice-icon">📦</div>
+            <div class="wiz-choice-title">Upload Backup</div>
+            <div class="wiz-choice-desc">Restore a HyperHDR backup JSON file from a previous installation.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         STEP 0B — Upload Backup (sub-pane, replaces pane-0)
+    ════════════════════════════════════════════════════════ -->
+    <div class="wiz-pane" id="wiz-pane-backup">
+      <div class="wiz-pane-title">Restore from Backup</div>
+      <div class="wiz-pane-sub">Drop your <code style="font-size:.8em;color:var(--wiz-accent);">HyperHDR_export_format_v20</code> JSON file below.</div>
+      <div class="wiz-section" style="max-width:520px;">
+        <div class="wiz-upload-zone" id="wiz-upload-zone">
+          <div class="wiz-upload-icon">📂</div>
+          <div class="wiz-upload-title">Drop backup JSON here</div>
+          <div class="wiz-upload-sub">or click to browse</div>
+          <input type="file" id="wiz-backup-file" accept=".json" style="display:none;" />
+        </div>
+        <div id="wiz-backup-status" style="margin-top:12px;display:none;"></div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         STEP 1 — Capture Source
+    ════════════════════════════════════════════════════════ -->
+    <div class="wiz-pane" id="wiz-pane-1">
+      <div class="wiz-pane-title">Capture Device</div>
+      <div class="wiz-pane-sub">Choose how HyperHDR will read your screen's video signal.</div>
+
+      <div style="display:flex;gap:14px;width:100%;max-width:860px;align-items:stretch;flex-wrap:wrap;">
+
+        <!-- LEFT column — source settings -->
+        <div class="wiz-section" style="flex:1;min-width:240px;max-width:360px;">
+          <div class="wiz-section-title">Source</div>
+          <div class="wiz-grab-tabs" id="wiz-grab-tabs" style="margin-bottom:16px;">
+            <button class="wiz-grab-tab active" data-grab="screen">🖥️ Screen</button>
+            <button class="wiz-grab-tab" data-grab="usb">📷 USB</button>
+          </div>
+
+          <!-- Screen capture options -->
+          <div id="wiz-grab-screen">
+            <div class="wiz-input-group">
+              <label>Capture Backend</label>
+              <select class="wiz-input" id="wiz-sys-device">
+                <option value="auto">Auto-detect</option>
+              </select>
+            </div>
+            <div class="wiz-input-group">
+              <label>Capture FPS</label>
+              <select class="wiz-input" id="wiz-sys-fps">
+                <option value="10">10 fps</option>
+                <option value="15">15 fps</option>
+                <option value="24" selected>24 fps</option>
+                <option value="30">30 fps</option>
+                <option value="60">60 fps</option>
+              </select>
+            </div>
+          </div>
+          <div id="wiz-grab-usb" style="display:none;">
+            <div class="wiz-input-group">
+              <label>Video Device</label>
+              <select class="wiz-input" id="wiz-vid-device">
+                <option value="auto">Auto-detect</option>
+              </select>
+            </div>
+            <div class="wiz-input-group">
+              <label>Resolution</label>
+              <select class="wiz-input" id="wiz-vid-mode">
+                <option value="auto">Auto</option>
+              </select>
+            </div>
+            <div class="wiz-input-group">
+              <label>FPS</label>
+              <select class="wiz-input" id="wiz-vid-fps">
+                <option value="0">Auto</option>
+              </select>
+            </div>
+          </div>
+
+        </div><!-- /LEFT column -->
+
+        <!-- RIGHT column — live preview -->
+        <div class="wiz-section" style="flex:2;min-width:260px;display:flex;flex-direction:column;">
+          <div class="wiz-section-title">Live Preview</div>
+          <div class="wiz-preview-frame" id="wiz-preview-frame-1" style="flex:1;min-height:180px;position:relative;">
+            <canvas id="wiz-preview-canvas-1" style="width:100%;height:100%;display:block;"></canvas>
+            <div class="wiz-preview-badge" id="wiz-preview-badge-1">No signal</div>
+          </div>
+          <div style="margin-top:10px;display:flex;justify-content:flex-end;">
+            <button class="wiz-btn wiz-btn-secondary" id="wiz-preview-toggle" style="font-size:.76rem;padding:7px 16px;">▶ Start Preview</button>
+          </div>
+        </div><!-- /RIGHT column -->
+
+      </div><!-- /flex row -->
+    </div><!-- /wiz-pane-1 -->
+
+    <!-- ═══════════════════════════════════════════════════════
+         STEP 2 — LED Controller (selection only)
+    ════════════════════════════════════════════════════════ -->
+    <div class="wiz-pane" id="wiz-pane-2">
+      <div class="wiz-pane-title">LED Controller</div>
+      <div class="wiz-pane-sub">Select the type of LED controller connected to your system.</div>
+      <div class="wiz-pane-scroll" style="max-width:760px;width:100%;overflow-y:auto;max-height:calc(100vh - 220px);">
+        <div class="wiz-section" style="max-width:760px;width:100%;">
+          <div class="wiz-section-title">Controller Type</div>
+          <div id="wiz-ctrl-grid">
+            <!-- populated by JS (populateControllerList); static fallback below -->
+            <div class="wiz-ctrl-group-label" style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--wiz-text3,rgba(255,255,255,.45));margin:18px 0 7px;padding-left:2px;">RPi SPI</div>
+            <div class="wiz-controller-grid">
+              <div class="wiz-ctrl-chip" data-type="apa102"    data-group="SPI">apa102</div>
+              <div class="wiz-ctrl-chip" data-type="apa104"    data-group="SPI">apa104</div>
+              <div class="wiz-ctrl-chip" data-type="hd108"     data-group="SPI">hd108</div>
+              <div class="wiz-ctrl-chip" data-type="hyperspi"  data-group="SPI">hyperspi</div>
+              <div class="wiz-ctrl-chip" data-type="lpd6803"   data-group="SPI">lpd6803</div>
+              <div class="wiz-ctrl-chip" data-type="lpd8806"   data-group="SPI">lpd8806</div>
+              <div class="wiz-ctrl-chip" data-type="p9813"     data-group="SPI">p9813</div>
+              <div class="wiz-ctrl-chip" data-type="sk6812spi" data-group="SPI">sk6812spi</div>
+              <div class="wiz-ctrl-chip" data-type="sk6822spi" data-group="SPI">sk6822spi</div>
+              <div class="wiz-ctrl-chip" data-type="sk9822"    data-group="SPI">sk9822</div>
+              <div class="wiz-ctrl-chip" data-type="ws2801"    data-group="SPI">ws2801</div>
+              <div class="wiz-ctrl-chip" data-type="ws2812spi" data-group="SPI">ws2812spi</div>
+            </div>
+            <div class="wiz-ctrl-group-label" style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--wiz-text3,rgba(255,255,255,.45));margin:18px 0 7px;padding-left:2px;">Network</div>
+            <div class="wiz-controller-grid">
+              <div class="wiz-ctrl-chip" data-type="atmoorb"       data-group="network">atmoorb</div>
+              <div class="wiz-ctrl-chip" data-type="cololight"     data-group="network">cololight</div>
+              <div class="wiz-ctrl-chip" data-type="fadecandy"     data-group="network">fadecandy</div>
+              <div class="wiz-ctrl-chip" data-type="home_assistant" data-group="network">home_assistant</div>
+              <div class="wiz-ctrl-chip" data-type="lifx"          data-group="network">lifx</div>
+              <div class="wiz-ctrl-chip" data-type="nanoleaf"      data-group="network">nanoleaf</div>
+              <div class="wiz-ctrl-chip" data-type="philipshue"    data-group="network">philipshue</div>
+              <div class="wiz-ctrl-chip" data-type="tpm2net"       data-group="network">tpm2net</div>
+              <div class="wiz-ctrl-chip" data-type="udpartnet"     data-group="network">udpartnet</div>
+              <div class="wiz-ctrl-chip" data-type="udpe131"       data-group="network">udpe131</div>
+              <div class="wiz-ctrl-chip" data-type="udph801"       data-group="network">udph801</div>
+              <div class="wiz-ctrl-chip" data-type="udpraw"        data-group="network">udpraw</div>
+              <div class="wiz-ctrl-chip" data-type="wled"          data-group="network">wled</div>
+              <div class="wiz-ctrl-chip" data-type="yeelight"      data-group="network">yeelight</div>
+              <div class="wiz-ctrl-chip" data-type="zigbee2mqtt"   data-group="network">zigbee2mqtt</div>
+            </div>
+            <div class="wiz-ctrl-group-label" style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--wiz-text3,rgba(255,255,255,.45));margin:18px 0 7px;padding-left:2px;">USB / Serial</div>
+            <div class="wiz-controller-grid">
+              <div class="wiz-ctrl-chip" data-type="adalight" data-group="serial">adalight</div>
+              <div class="wiz-ctrl-chip" data-type="atmo"     data-group="serial">atmo</div>
+              <div class="wiz-ctrl-chip" data-type="dmx"      data-group="serial">dmx</div>
+              <div class="wiz-ctrl-chip" data-type="karate"   data-group="serial">karate</div>
+              <div class="wiz-ctrl-chip" data-type="sedu"     data-group="serial">sedu</div>
+              <div class="wiz-ctrl-chip" data-type="skydimo"  data-group="serial">skydimo</div>
+              <div class="wiz-ctrl-chip" data-type="tpm2"     data-group="serial">tpm2</div>
+            </div>
+            <div class="wiz-ctrl-group-label" style="font-size:.65rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--wiz-text3,rgba(255,255,255,.45));margin:18px 0 7px;padding-left:2px;">Debug</div>
+            <div class="wiz-controller-grid">
+              <div class="wiz-ctrl-chip" data-type="file" data-group="debug">file</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         STEP 2O — Controller Options
+         Built dynamically using serverSchema + createJsonEditor
+         (same as light_source.js). WLED bypasses this pane.
+    ════════════════════════════════════════════════════════ -->
+    <div class="wiz-pane" id="wiz-pane-2o">
+      <div class="wiz-pane-title" id="wiz-2o-title">Controller Options</div>
+      <div class="wiz-pane-sub"   id="wiz-2o-sub">Configure your LED controller settings.</div>
+      <div class="wiz-pane-scroll" style="max-width:700px;width:100%;">
+        <div class="wiz-section" style="max-width:700px;width:100%;">
+          <!-- Warning/hint area (e.g. SPI driver warning, matching light_source.js) -->
+          <div id="wiz-ctrl-hint" style="margin-bottom:12px;display:none;"></div>
+          <!-- JSON editor mounts here via createJsonEditor('wiz-ctrl-editor-container') -->
+          <div id="wiz-ctrl-editor-container"></div>
+          <!-- Device discovery dropdown for SPI / serial port selection -->
+          <div id="wiz-ctrl-discovery-wrap" style="margin-top:12px;display:none;">
+            <div class="wiz-input-group">
+              <label id="wiz-disc-label">Available devices</label>
+              <select class="wiz-input" id="wiz-ctrl-discovery-sel">
+                <option value="">Select a device…</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         STEP 2W — WLED Connect
+    ════════════════════════════════════════════════════════ -->
+    <div class="wiz-pane" id="wiz-pane-2w">
+      <div class="wiz-pane-title">Connect WLED Device</div>
+      <div class="wiz-pane-sub">Enter the IP address of your WLED device, or scan to find it automatically.</div>
+      <div class="wiz-section" style="max-width:500px;width:100%;">
+
+        <div class="wiz-section-title">WLED IP Address</div>
+        <div class="wiz-connect-row" style="margin-bottom:12px;">
+          <input class="wiz-input" type="text" id="wiz-wled-ip" placeholder="e.g. 192.168.1.100" style="flex:1;font-family:var(--wiz-mono);" />
+          <button class="wiz-btn wiz-btn-secondary" id="wiz-wled-scan" style="white-space:nowrap;flex-shrink:0;">🔍 Scan</button>
+          <button class="wiz-btn wiz-btn-primary"   id="wiz-wled-connect" style="flex-shrink:0;">Connect</button>
+        </div>
+
+        <!-- Scan results -->
+        <div id="wiz-wled-scan-results" style="display:none;margin-bottom:14px;">
+          <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--wiz-text3);margin-bottom:8px;">Found on network</div>
+          <div id="wiz-wled-devices" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+        </div>
+
+        <!-- Connection status -->
+        <div id="wiz-wled-status" class="wiz-status-badge idle" style="width:100%;box-sizing:border-box;">
+          <div class="wiz-status-dot"></div>
+          <span id="wiz-wled-status-text">Not connected</span>
+        </div>
+
+        <!-- Strobe progress bar (shown during 2s strobe) -->
+        <div id="wiz-wled-strobe-bar" style="display:none;margin-top:10px;padding:10px 14px;border-radius:9px;background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.25);align-items:center;gap:10px;">
+          <span style="font-size:1.1rem;">⚡</span>
+          <div style="flex:1;">
+            <div style="font-size:.78rem;font-weight:600;color:var(--wiz-yellow);">Strobing LEDs…</div>
+            <div style="height:3px;background:rgba(251,191,36,.2);border-radius:2px;margin-top:5px;overflow:hidden;">
+              <div id="wiz-strobe-progress-bar" style="height:100%;width:0%;background:var(--wiz-yellow);border-radius:2px;transition:width 2s linear;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="wiz-divider"></div>
+
+        <!-- LED count -->
+        <div class="wiz-input-group">
+          <label>Number of LEDs on WLED device</label>
+          <input class="wiz-input" type="number" id="wiz-wled-leds" value="60" min="1" max="1000" style="width:120px;font-family:var(--wiz-mono);" />
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         STEP 3 — LED Layout
+    ════════════════════════════════════════════════════════ -->
+    <div class="wiz-pane" id="wiz-pane-3">
+      <div class="wiz-pane-title">LED Layout</div>
+      <div class="wiz-pane-sub">Set how many LEDs are on each side of your screen, then test each side.</div>
+
+      <!-- Full-width two-column layout: controls left, preview right -->
+      <div class="wiz-layout3-wrap">
+
+        <!-- LEFT PANEL: All controls (yellow box equivalent) -->
+        <div class="wiz-layout3-controls wiz-section">
+
+          <!-- LED counts arranged as a mini-screen grid -->
+          <div class="wiz-section-title">LED Counts</div>
+          <div class="wiz-led-layout">
+            <div class="wiz-led-top wiz-led-input-stack">
+              <label>Top</label>
+              <input class="wiz-input wiz-led-count" type="number" id="wiz-led-top" value="25" min="0" />
+              <button class="wiz-strobe-btn" data-side="top" title="Test top LEDs">⚡ Test</button>
+            </div>
+            <div class="wiz-led-left wiz-led-input-stack">
+              <label>Left</label>
+              <input class="wiz-input wiz-led-count" type="number" id="wiz-led-left" value="14" min="0" />
+              <button class="wiz-strobe-btn" data-side="left" title="Test left LEDs">⚡ Test</button>
+            </div>
+            <div class="wiz-led-mid">
+              <!-- empty center cell -->
+            </div>
+            <div class="wiz-led-right wiz-led-input-stack">
+              <label>Right</label>
+              <input class="wiz-input wiz-led-count" type="number" id="wiz-led-right" value="14" min="0" />
+              <button class="wiz-strobe-btn" data-side="right" title="Test right LEDs">⚡ Test</button>
+            </div>
+            <div class="wiz-led-bot wiz-led-input-stack">
+              <label>Bottom</label>
+              <input class="wiz-input wiz-led-count" type="number" id="wiz-led-bottom" value="25" min="0" />
+              <button class="wiz-strobe-btn" data-side="bottom" title="Test bottom LEDs">⚡ Test</button>
+            </div>
+          </div>
+
+          <div class="wiz-divider"></div>
+
+          <!-- Advanced options -->
+          <div class="wiz-section-title">Advanced Options</div>
+          <div class="wiz-gap-group">
+            <div class="wiz-gap-row">
+              <label>Start position</label>
+              <div class="wiz-stepper">
+                <button class="wiz-stepper-btn" onclick="wizStep('wiz-led-position',-1)">−</button>
+                <input class="wiz-input" type="number" id="wiz-led-position" value="0" min="0" />
+                <button class="wiz-stepper-btn" onclick="wizStep('wiz-led-position',1)">+</button>
+              </div>
+            </div>
+            <div class="wiz-gap-row">
+              <label>Gap position</label>
+              <div class="wiz-stepper">
+                <button class="wiz-stepper-btn" onclick="wizStep('wiz-led-gpos',-1)">−</button>
+                <input class="wiz-input" type="number" id="wiz-led-gpos" value="0" min="0" />
+                <button class="wiz-stepper-btn" onclick="wizStep('wiz-led-gpos',1)">+</button>
+              </div>
+            </div>
+            <div class="wiz-gap-row">
+              <label>Gap length</label>
+              <div class="wiz-stepper">
+                <button class="wiz-stepper-btn" onclick="wizStep('wiz-led-glength',-1)">−</button>
+                <input class="wiz-input" type="number" id="wiz-led-glength" value="0" min="0" />
+                <button class="wiz-stepper-btn" onclick="wizStep('wiz-led-glength',1)">+</button>
+              </div>
+            </div>
+            <div class="wiz-gap-row">
+              <label>Reverse</label>
+              <input type="checkbox" id="wiz-led-reverse" style="width:18px;height:18px;accent-color:var(--wiz-accent);cursor:pointer;" />
+            </div>
+          </div>
+
+          <div class="wiz-divider"></div>
+
+          <div style="display:flex;align-items:center;justify-content:space-between;font-size:.75rem;color:var(--wiz-text2);">
+            <span>Total: <b style="color:var(--wiz-accent);" id="wiz-led-total">78</b> LEDs</span>
+            <span style="font-size:.65rem;color:var(--wiz-text3);font-style:italic;">Updates live</span>
+          </div>
+        </div>
+
+        <!-- RIGHT PANEL: Full LED preview (red box equivalent) -->
+        <div class="wiz-layout3-preview">
+          <div class="wiz-preview-frame wiz-layout3-frame" id="wiz-preview-frame-3">
+            <div id="wiz-leds-preview-wrap" style="position:relative;width:100%;height:100%;">
+              <canvas id="wiz-image-canvas" style="position:absolute;left:0;top:0;width:100%;height:100%;z-index:1;"></canvas>
+              <canvas id="wiz-leds-canvas"  style="position:absolute;left:0;top:0;width:100%;height:100%;z-index:2;"></canvas>
+            </div>
+            <div class="wiz-preview-badge" id="wiz-layout-badge">Preview</div>
+          </div>
+          <!-- Test buttons below preview -->
+          <div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:8px;align-items:center;">
+            <span id="wiz-layout-wled-badge" style="display:none;font-size:.68rem;font-family:var(--wiz-mono);padding:4px 10px;border-radius:7px;border:1px solid;margin-right:auto;"></span>
+            <button class="wiz-btn wiz-btn-secondary" id="wiz-toggle-led-nums" style="font-size:.72rem;padding:6px 12px;">🔢 Show LED Numbers</button>
+            <button class="wiz-btn wiz-btn-secondary" id="wiz-strobe-all-btn" style="font-size:.72rem;padding:6px 12px;">⚡ Test All</button>
+            
+          </div>
+        </div>
+
+      </div><!-- /.wiz-layout3-wrap -->
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════
+         STEP 4 — Review & Save
+    ════════════════════════════════════════════════════════ -->
+    <div class="wiz-pane" id="wiz-pane-4">
+      <div class="wiz-pane-title">Review &amp; Save</div>
+      <div class="wiz-pane-sub">Your configuration is ready. Review the settings below and save to apply.</div>
+      <div class="wiz-pane-scroll" style="max-width:680px;width:100%;">
+        <div class="wiz-summary-grid" id="wiz-summary-grid">
+          <div class="wiz-summary-card"><div class="label">Capture Source</div><div class="value accent" id="sum-capture">—</div></div>
+          <div class="wiz-summary-card"><div class="label">LED Controller</div><div class="value accent" id="sum-ctrl">—</div></div>
+          <div class="wiz-summary-card"><div class="label">Total LEDs</div><div class="value green" id="sum-leds">—</div></div>
+          <div class="wiz-summary-card"><div class="label">Layout</div><div class="value" id="sum-layout">—</div></div>
+          <div class="wiz-summary-card"><div class="label">WLED IP</div><div class="value" id="sum-wled">N/A</div></div>
+          <div class="wiz-summary-card"><div class="label">Status</div><div class="value green" id="sum-status">Ready</div></div>
+        </div>
+        <div style="margin-top:20px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;">
+          <button class="wiz-btn wiz-btn-success" id="wiz-save-btn">Save &amp; Launch HyperHDR</button>
+          <button class="wiz-btn wiz-btn-ghost" id="wiz-back-from-final">← Back</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /.wiz-body -->
+
+  <!-- ── Footer nav ───────────────────────────────────────── -->
+  <div class="wiz-footer">
+    <div class="wiz-footer-left">
+      <button class="wiz-btn wiz-btn-secondary" id="wiz-back-btn" style="display:none;">← Back</button>
+    </div>
+    <div class="wiz-footer-center"></div>
+    <div class="wiz-footer-right">
+      <button class="wiz-btn wiz-btn-ghost" id="wiz-skip-btn">Skip setup</button>
+      <button class="wiz-btn wiz-btn-primary" id="wiz-next-btn" style="display:none;">Next →</button>
+    </div>
+  </div>
+
+</div><!-- /#setup-wizard-overlay -->
+
+<!-- ── Fullscreen strobe tester ─────────────────────────────── -->
+<div id="wiz-strobe-fs">
+  <div id="wiz-strobe-fs-inner">
+    <div style="font-size:1.2rem;font-weight:600;margin-bottom:8px;" id="wiz-strobe-fs-label">Testing all LEDs…</div>
+    <div style="font-size:.8rem;opacity:.5;">The LEDs should flash white/colour around your screen.</div>
+    <button onclick="window.wizCloseStrobeFS()">✕ Close Fullscreen</button>
+  </div>
+</div>

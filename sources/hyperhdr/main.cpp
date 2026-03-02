@@ -1,5 +1,6 @@
 #ifndef PCH_ENABLED
 	#include <QCoreApplication>
+	#include <QApplication>
 	#include <QLocale>
 	#include <QFile>
 	#include <QString>
@@ -13,6 +14,9 @@
 	#include <cstdlib>
 	#include <cstdio>
 #endif
+
+#include <QLocalServer>
+#include <QLocalSocket>
 
 #include <csignal>
 
@@ -34,6 +38,7 @@
 #include <HyperhdrConfig.h>
 
 #include "SystrayHandler.h"
+#include "UiLauncher.h"
 #include <utils/Logger.h>
 #include <commandline/Parser.h>
 #include <utils/DefaultSignalHandler.h>
@@ -106,7 +111,7 @@ QCoreApplication* createApplication(bool& isGuiApp, int& argc, char* argv[])
 	}
 #endif
 
-	QCoreApplication* app = new QCoreApplication(argc, argv);
+	QCoreApplication* app = isGuiApp ? static_cast<QCoreApplication*>(new QApplication(argc, argv)) : new QCoreApplication(argc, argv);
 	QCoreApplication::setApplicationName("HyperHdr");
 	QCoreApplication::setApplicationVersion(HYPERHDR_VERSION);
 	// add optional library path
@@ -155,6 +160,7 @@ int main(int argc, char** argv)
 #endif
 	parser.add<BooleanOption>(0x0, "desktop", "Show systray on desktop");
 	parser.add<BooleanOption>(0x0, "service", "Force HyperHdr to start as console service");
+	BooleanOption& minimizedOption = parser.add<BooleanOption>(0x0, "minimized", "Start minimized to tray without showing the main window");
 
 	/* Internal options, invisible to help */
 	BooleanOption& waitOption = parser.addHidden<BooleanOption>(0x0, "wait-hyperhdr", "Do not exit if other HyperHdr instances are running, wait them to finish");
@@ -175,8 +181,25 @@ int main(int argc, char** argv)
 	{
 		if (getProcessIdsByProcessName(processName).size() > 1)
 		{
-			std::cerr << "The HyperHDR Daemon is already running, abort start";
-			return 1;
+			// Another instance is already running.
+			// If we are in GUI mode, signal it to show its window then exit.
+			if (isGuiApp)
+			{
+				QLocalSocket socket;
+				socket.connectToServer("hyperhdr-show-window");
+				if (socket.waitForConnected(1000))
+				{
+					socket.write("show");
+					socket.flush();
+					socket.waitForBytesWritten(1000);
+					socket.disconnectFromServer();
+				}
+			}
+			else
+			{
+				std::cerr << "The HyperHDR Daemon is already running, abort start";
+			}
+			return 0;
 		}
 	}
 	else
@@ -351,7 +374,42 @@ int main(int argc, char** argv)
 		}
 
 		// run the application
-		SystrayHandler* systray = (isGuiApp) ? new SystrayHandler(hyperhdrd, hyperhdrd->getWebPort(), userDataDirectory.absolutePath()) : nullptr;
+		// UiLauncher spawns hyperhdr-ui.exe on demand.
+		// All WebEngine/Chromium RAM lives in that child process.
+		// Closing the window exits the child, freeing all RAM instantly.
+		UiLauncher* uiLauncher = nullptr;
+		if (isGuiApp)
+		{
+			uiLauncher = new UiLauncher(hyperhdrd->getWebPort(), qApp);
+			if (!parser.isSet(minimizedOption))
+			{
+				uiLauncher->show();
+				Info(log, "Desktop window launched on port {:d}", hyperhdrd->getWebPort());
+			}
+			else
+			{
+				Info(log, "Started minimized to tray on port {:d}", hyperhdrd->getWebPort());
+			}
+		}
+
+		// Handle second-instance clicks — signal the UI process to raise its window
+		QLocalServer::removeServer("hyperhdr-show-window");
+		QLocalServer* localServer = nullptr;
+		if (isGuiApp && uiLauncher != nullptr)
+		{
+			localServer = new QLocalServer(qApp);
+			localServer->listen("hyperhdr-show-window");
+			QObject::connect(localServer, &QLocalServer::newConnection, uiLauncher, [localServer, uiLauncher]() {
+				QLocalSocket* socket = localServer->nextPendingConnection();
+				QObject::connect(socket, &QLocalSocket::readyRead, uiLauncher, [socket, uiLauncher]() {
+					if (socket->readAll().contains("show"))
+						uiLauncher->show();
+					socket->deleteLater();
+				});
+			});
+		}
+
+		SystrayHandler* systray = (isGuiApp) ? new SystrayHandler(hyperhdrd, hyperhdrd->getWebPort(), userDataDirectory.absolutePath(), uiLauncher) : nullptr;
 
 		if (systray != nullptr && systray->isInitialized())
 		{
@@ -381,6 +439,9 @@ int main(int argc, char** argv)
 		}
 
 		Info(log, "The application closed with code {:d}", rc);
+
+		delete uiLauncher;
+		uiLauncher = nullptr;
 
 		delete systray;
 		systray = nullptr;

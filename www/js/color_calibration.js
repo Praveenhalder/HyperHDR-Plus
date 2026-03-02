@@ -218,6 +218,271 @@
         }
     }
 
+    /* ══════════════════════════════════════════════════════════════
+       CUSTOM INLINE COLOUR PICKER  (replaces native <input type=color>)
+       – gradient canvas (SV field) + hue bar + RGB number inputs
+       – fires applyToHyperHDR() on every drag/input → fully real-time
+    ══════════════════════════════════════════════════════════════ */
+
+    /* Convert HSV (0-360, 0-1, 0-1) → RGB [0-255] */
+    function hsvToRgb(h, s, v) {
+        var r, g, b, i = Math.floor(h / 60), f = h / 60 - i,
+            p = v * (1 - s), q = v * (1 - f * s), t = v * (1 - (1 - f) * s);
+        switch (i % 6) {
+            case 0: r=v; g=t; b=p; break; case 1: r=q; g=v; b=p; break;
+            case 2: r=p; g=v; b=t; break; case 3: r=p; g=q; b=v; break;
+            case 4: r=t; g=p; b=v; break; default: r=v; g=p; b=q;
+        }
+        return [Math.round(r*255), Math.round(g*255), Math.round(b*255)];
+    }
+
+    /* Convert RGB [0-255] → HSV {h:0-360, s:0-1, v:0-1} */
+    function rgbToHsv(r, g, b) {
+        r/=255; g/=255; b/=255;
+        var max=Math.max(r,g,b), min=Math.min(r,g,b), d=max-min, h, s=max?d/max:0, v=max;
+        if (!d) { h=0; }
+        else if (max===r) { h=((g-b)/d+6)%6; }
+        else if (max===g) { h=(b-r)/d+2; }
+        else              { h=(r-g)/d+4; }
+        return { h: h*60, s: s, v: v };
+    }
+
+    /* Draw the SV gradient square for a given hue */
+    function drawSVCanvas(canvas, hue) {
+        var ctx = canvas.getContext('2d'), W = canvas.width, H = canvas.height;
+        ctx.clearRect(0,0,W,H);
+        /* base hue */
+        ctx.fillStyle = 'hsl('+hue+',100%,50%)';
+        ctx.fillRect(0,0,W,H);
+        /* white left→right */
+        var wg = ctx.createLinearGradient(0,0,W,0);
+        wg.addColorStop(0,'rgba(255,255,255,1)'); wg.addColorStop(1,'rgba(255,255,255,0)');
+        ctx.fillStyle = wg; ctx.fillRect(0,0,W,H);
+        /* black top→bottom */
+        var bg = ctx.createLinearGradient(0,0,0,H);
+        bg.addColorStop(0,'rgba(0,0,0,0)'); bg.addColorStop(1,'rgba(0,0,0,1)');
+        ctx.fillStyle = bg; ctx.fillRect(0,0,W,H);
+    }
+
+    /* Draw vertical hue bar */
+    function drawHueBar(canvas) {
+        var ctx = canvas.getContext('2d'), W = canvas.width, H = canvas.height;
+        var g = ctx.createLinearGradient(0,0,0,H);
+        [0,60,120,180,240,300,360].forEach(function(deg, i) {
+            g.addColorStop(i/6, 'hsl('+deg+',100%,50%)');
+        });
+        ctx.fillStyle = g; ctx.fillRect(0,0,W,H);
+    }
+
+    /* One active popup tracker */
+    var activePickerKey = null;
+
+    function openInlinePicker(key) {
+        /* close any existing popup */
+        closeInlinePicker();
+        activePickerKey = key;
+
+        var rgb = state.cal[key];
+        var hsv = rgbToHsv(rgb[0], rgb[1], rgb[2]);
+
+        /* ── build popup DOM ── */
+        var popup = document.createElement('div');
+        popup.className = 'ch-inline-picker';
+        popup.id = 'ch-inline-popup-' + key;
+
+        /* SV canvas */
+        var svCanvas = document.createElement('canvas');
+        svCanvas.className = 'ch-sv-canvas';
+        svCanvas.width  = 200;
+        svCanvas.height = 150;
+
+        /* SV marker */
+        var svMarker = document.createElement('div');
+        svMarker.className = 'ch-sv-marker';
+
+        var svWrap = document.createElement('div');
+        svWrap.className = 'ch-sv-wrap';
+        svWrap.appendChild(svCanvas);
+        svWrap.appendChild(svMarker);
+
+        /* Hue bar */
+        var hueCanvas = document.createElement('canvas');
+        hueCanvas.className = 'ch-hue-bar';
+        hueCanvas.width  = 16;
+        hueCanvas.height = 150;
+
+        var hueMarker = document.createElement('div');
+        hueMarker.className = 'ch-hue-marker';
+
+        var hueWrap = document.createElement('div');
+        hueWrap.className = 'ch-hue-wrap';
+        hueWrap.appendChild(hueCanvas);
+        hueWrap.appendChild(hueMarker);
+
+        var canvasRow = document.createElement('div');
+        canvasRow.className = 'ch-canvas-row';
+        canvasRow.appendChild(svWrap);
+        canvasRow.appendChild(hueWrap);
+
+        /* RGB inputs row */
+        var inputsRow = document.createElement('div');
+        inputsRow.className = 'ch-picker-inputs-row';
+
+        /* eyedropper spacer + preview swatch */
+        var previewSwatch = document.createElement('div');
+        previewSwatch.className = 'ch-picker-preview';
+        previewSwatch.style.background = rgbToHex(rgb);
+
+        var rInp = makePickerNumInput('R', rgb[0]);
+        var gInp = makePickerNumInput('G', rgb[1]);
+        var bInp = makePickerNumInput('B', rgb[2]);
+        var spinBtn = document.createElement('div');
+        spinBtn.className = 'ch-picker-spin';
+        spinBtn.innerHTML = '&#8597;';
+
+        inputsRow.appendChild(previewSwatch);
+        inputsRow.appendChild(rInp.wrap);
+        inputsRow.appendChild(gInp.wrap);
+        inputsRow.appendChild(bInp.wrap);
+        inputsRow.appendChild(spinBtn);
+
+        popup.appendChild(canvasRow);
+        popup.appendChild(inputsRow);
+
+        /* ── position below the swatch ── */
+        var swatchEl = document.getElementById('ch-swatch-' + key);
+        var calPanel = document.getElementById('cal-panel');
+        if (swatchEl && calPanel) {
+            var sr = swatchEl.getBoundingClientRect();
+            var pr = calPanel.getBoundingClientRect();
+            popup.style.position = 'absolute';
+            popup.style.top  = (sr.bottom - pr.top + calPanel.scrollTop + 4) + 'px';
+            popup.style.left = (sr.left   - pr.left) + 'px';
+            calPanel.style.position = 'relative';
+            calPanel.appendChild(popup);
+        } else {
+            document.body.appendChild(popup);
+        }
+
+        /* ── draw initial state ── */
+        drawSVCanvas(svCanvas, hsv.h);
+        drawHueBar(hueCanvas);
+        placeSVMarker(svMarker, svCanvas, hsv.s, hsv.v);
+        placeHueMarker(hueMarker, hueCanvas, hsv.h);
+
+        /* internal mutable HSV state for this picker */
+        var H = hsv.h, S = hsv.s, V = hsv.v;
+
+        function commit() {
+            var newRgb = hsvToRgb(H, S, V);
+            state.cal[key] = newRgb;
+            previewSwatch.style.background = rgbToHex(newRgb);
+            rInp.inp.value = newRgb[0];
+            gInp.inp.value = newRgb[1];
+            bInp.inp.value = newRgb[2];
+            updateChannelUI(key);
+            applyToHyperHDR();
+        }
+
+        /* ── SV canvas drag ── */
+        function pickSV(e) {
+            var rect = svCanvas.getBoundingClientRect();
+            var cx = (e.clientX !== undefined ? e.clientX : e.touches[0].clientX);
+            var cy = (e.clientY !== undefined ? e.clientY : e.touches[0].clientY);
+            S = Math.max(0, Math.min(1, (cx - rect.left) / rect.width));
+            V = Math.max(0, Math.min(1, 1 - (cy - rect.top) / rect.height));
+            placeSVMarker(svMarker, svCanvas, S, V);
+            commit();
+        }
+        var svDragging = false;
+        svCanvas.addEventListener('mousedown',  function(e){ svDragging=true; pickSV(e); e.preventDefault(); });
+        svCanvas.addEventListener('touchstart', function(e){ svDragging=true; pickSV(e); e.preventDefault(); }, {passive:false});
+        document.addEventListener('mousemove',  function(e){ if(svDragging) pickSV(e); });
+        document.addEventListener('touchmove',  function(e){ if(svDragging) pickSV(e); }, {passive:false});
+        document.addEventListener('mouseup',    function(){ svDragging=false; });
+        document.addEventListener('touchend',   function(){ svDragging=false; });
+
+        /* ── Hue bar drag ── */
+        function pickHue(e) {
+            var rect = hueCanvas.getBoundingClientRect();
+            var cy = (e.clientY !== undefined ? e.clientY : e.touches[0].clientY);
+            H = Math.max(0, Math.min(359.99, ((cy - rect.top) / rect.height) * 360));
+            drawSVCanvas(svCanvas, H);
+            placeHueMarker(hueMarker, hueCanvas, H);
+            commit();
+        }
+        var hueDragging = false;
+        hueCanvas.addEventListener('mousedown',  function(e){ hueDragging=true; pickHue(e); e.preventDefault(); });
+        hueCanvas.addEventListener('touchstart', function(e){ hueDragging=true; pickHue(e); e.preventDefault(); }, {passive:false});
+        document.addEventListener('mousemove',   function(e){ if(hueDragging) pickHue(e); });
+        document.addEventListener('touchmove',   function(e){ if(hueDragging) pickHue(e); }, {passive:false});
+        document.addEventListener('mouseup',     function(){ hueDragging=false; });
+        document.addEventListener('touchend',    function(){ hueDragging=false; });
+
+        /* ── RGB number inputs ── */
+        function onRgbInput() {
+            var r = Math.max(0,Math.min(255, parseInt(rInp.inp.value)||0));
+            var g = Math.max(0,Math.min(255, parseInt(gInp.inp.value)||0));
+            var b = Math.max(0,Math.min(255, parseInt(bInp.inp.value)||0));
+            var hsv2 = rgbToHsv(r,g,b);
+            H=hsv2.h; S=hsv2.s; V=hsv2.v;
+            drawSVCanvas(svCanvas, H);
+            placeSVMarker(svMarker, svCanvas, S, V);
+            placeHueMarker(hueMarker, hueCanvas, H);
+            previewSwatch.style.background = rgbToHex([r,g,b]);
+            state.cal[key] = [r,g,b];
+            updateChannelUI(key);
+            applyToHyperHDR();
+        }
+        rInp.inp.addEventListener('input', onRgbInput);
+        gInp.inp.addEventListener('input', onRgbInput);
+        bInp.inp.addEventListener('input', onRgbInput);
+
+        /* ── close on outside click ── */
+        setTimeout(function () {
+            document.addEventListener('mousedown', function outsideClose(e) {
+                if (!popup.contains(e.target) &&
+                    e.target.id !== 'ch-swatch-' + key) {
+                    closeInlinePicker();
+                    document.removeEventListener('mousedown', outsideClose);
+                }
+            });
+        }, 10);
+    }
+
+    function closeInlinePicker() {
+        if (activePickerKey) {
+            var old = document.getElementById('ch-inline-popup-' + activePickerKey);
+            if (old && old.parentNode) old.parentNode.removeChild(old);
+            activePickerKey = null;
+        }
+    }
+
+    function placeSVMarker(marker, canvas, s, v) {
+        var rect = canvas.getBoundingClientRect();
+        var W = rect.width  || canvas.width;
+        var H = rect.height || canvas.height;
+        marker.style.left = (s * W - 7) + 'px';
+        marker.style.top  = ((1 - v) * H - 7) + 'px';
+    }
+
+    function placeHueMarker(marker, canvas, h) {
+        var H = canvas.getBoundingClientRect().height || canvas.height;
+        marker.style.top = ((h / 360) * H - 5) + 'px';
+    }
+
+    function makePickerNumInput(label, val) {
+        var wrap = document.createElement('div');
+        wrap.className = 'ch-picker-num-wrap';
+        var inp = document.createElement('input');
+        inp.type = 'number'; inp.min = '0'; inp.max = '255';
+        inp.value = val; inp.className = 'ch-picker-num';
+        var lbl = document.createElement('div');
+        lbl.className = 'ch-picker-num-label'; lbl.textContent = label;
+        wrap.appendChild(inp); wrap.appendChild(lbl);
+        return { wrap: wrap, inp: inp };
+    }
+
     function appendChannelRow(ch, container) {
             var rgb  = state.cal[ch.key];
             var hex  = rgbToHex(rgb);
@@ -227,23 +492,17 @@
             row.className = 'ch-picker-row';
             row.id = 'ch-row-' + ch.key;
 
-            /* swatch with hidden native color input */
+            /* swatch — clicks open the inline picker */
             var swatchDiv = document.createElement('div');
             swatchDiv.className = 'ch-picker-swatch';
             swatchDiv.style.background = hex;
             swatchDiv.id = 'ch-swatch-' + ch.key;
-
-            var colorInput = document.createElement('input');
-            colorInput.type  = 'color';
-            colorInput.value = hex;
-            colorInput.id    = 'ch-color-input-' + ch.key;
-            colorInput.addEventListener('input', function () {
-                var newRgb = hexToRgb(this.value);
-                state.cal[ch.key] = newRgb;
-                updateChannelUI(ch.key);
-                applyToHyperHDR();   /* REALTIME */
+            swatchDiv.style.cursor = 'pointer';
+            swatchDiv.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (activePickerKey === ch.key) { closeInlinePicker(); return; }
+                openInlinePicker(ch.key);
             });
-            swatchDiv.appendChild(colorInput);
 
             /* info block */
             var infoDiv = document.createElement('div');
@@ -338,9 +597,6 @@
 
         var swatch = document.getElementById('ch-swatch-' + key);
         if (swatch) swatch.style.background = hex;
-
-        var inp = document.getElementById('ch-color-input-' + key);
-        if (inp) inp.value = hex;
 
         var label = document.getElementById('ch-rgb-label-' + key);
         if (label) label.textContent = 'R:' + rgb[0] + ' G:' + rgb[1] + ' B:' + rgb[2];
@@ -609,6 +865,7 @@
     }
 
     function exitFullscreen() {
+        closeInlinePicker();
         if (!savedSinceOpen) {
             /* Restore to the values that were active when the page loaded */
             state = deepClone(DEFAULTS);

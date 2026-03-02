@@ -136,7 +136,7 @@ svg.svg4hyperhdr.leftmenu {
     margin-left: 0;
     margin-right: .5em;
 }
-.col.bottom-menu .svg4hyperhdr { width: 21px; }
+.col.bottom-menu .svg4hyperhdr { width: 16px; }
 
 /* ── Top-left icon hover ──────────────────────────────────── */
 body:not(.dark-mode) svg.svg4hyperhdr.top-left-menu:hover { color: #c0392b; }
