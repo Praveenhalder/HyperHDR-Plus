@@ -3,6 +3,19 @@
 
 ## 🚀 What's New
 
+### 🌐 Built-in WebEngine UI
+- Added integrated WebEngine interface
+- No external browser required
+- Fully embedded app UI
+
+### 🧙 Easy Setup Wizard
+- Added new 4-step setup wizard
+- Simple and guided configuration process
+- Faster first-time setup
+
+<img width="1589" height="1033" alt="Screenshot 2026-03-02 234221" src="https://github.com/user-attachments/assets/a973d83c-73e7-441e-a4e4-c89e44af13e5" />
+
+
 ### 🎨 Color Calibration Tool
 - Added a **Color Calibration Tool** for precise LED color tuning.
 - Adjust **Red**, **Green**, **Blue**, **Brightness**, and **Gamma** values.
