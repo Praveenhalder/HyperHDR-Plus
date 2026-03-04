@@ -1228,27 +1228,53 @@
         }
 
         if (typeof requestLedDeviceDiscovery === 'function') {
-            requestLedDeviceDiscovery('wled')
-                .then(function(result){
-                    resetScanBtn();
-                    if (devContainer) devContainer.innerHTML = '';
+            var foundDevices = {};
+            var scanCount    = 0;
+            var maxScans     = 10;   // 10 x 500ms = 5 seconds
+            var scanInterval = 500;
 
-                    var devices = (result && result.info && result.info.devices) ? result.info.devices : [];
-                    if (devices.length) {
-                        devices.forEach(function(dev){
-                            devContainer.appendChild(buildDeviceChip(dev));
+            function renderDevices() {
+                var devices = Object.values(foundDevices);
+                if (devContainer) devContainer.innerHTML = '';
+                if (devices.length) {
+                    devices.forEach(function(dev){
+                        devContainer.appendChild(buildDeviceChip(dev));
+                    });
+                    setWledStatus('idle', devices.length + ' device' + (devices.length > 1 ? 's' : '') + ' found — click to connect');
+                } else {
+                    if (devContainer) devContainer.innerHTML = '<div style="font-size:.75rem;color:var(--wiz-text2);">No WLED devices found. Enter IP manually.</div>';
+                    setWledStatus('idle', 'No devices found');
+                }
+            }
+
+            function doScan() {
+                scanCount++;
+                var remaining = maxScans - scanCount + 1;
+                if (scanBtn) scanBtn.innerHTML = '<span class="wiz-spinner" style="display:inline-block;vertical-align:middle;margin-right:4px;"></span> Scanning… ' + Math.ceil(remaining * scanInterval / 1000) + 's';
+
+                requestLedDeviceDiscovery('wled')
+                    .then(function(result) {
+                        var devices = (result && result.info && result.info.devices) ? result.info.devices : [];
+                        devices.forEach(function(dev) {
+                            foundDevices[dev.value] = dev;
                         });
-                        setWledStatus('idle', devices.length + ' device' + (devices.length > 1 ? 's' : '') + ' found — click to connect');
-                    } else {
-                        devContainer.innerHTML = '<div style="font-size:.75rem;color:var(--wiz-text2);">No WLED devices found. Enter IP manually.</div>';
-                        setWledStatus('idle', 'No devices found');
-                    }
-                })
-                .catch(function(){
-                    resetScanBtn();
-                    if (devContainer) devContainer.innerHTML = '<div style="font-size:.75rem;color:var(--wiz-red);">Scan failed. Enter IP manually.</div>';
-                    setWledStatus('idle', 'Scan failed');
-                });
+                        // Update display live as devices are found
+                        if (Object.keys(foundDevices).length) renderDevices();
+                    })
+                    .catch(function() {});
+
+                if (scanCount < maxScans) {
+                    setTimeout(doScan, scanInterval);
+                } else {
+                    // All scans done
+                    setTimeout(function() {
+                        resetScanBtn();
+                        renderDevices();
+                    }, scanInterval);
+                }
+            }
+
+            doScan();
         } else {
             resetScanBtn();
             if (devContainer) devContainer.innerHTML = '<div style="font-size:.75rem;color:var(--wiz-text2);">Auto-scan not available. Enter the WLED IP address manually.</div>';
@@ -1345,6 +1371,23 @@
             .then(function() { if (cb) cb(true); })
             .catch(function(e) {
                 console.warn('[WLED] ledmap clear error:', e);
+                if (cb) cb(false);
+            });
+    }
+
+    function uploadEmptyLedmapNoReboot(cb) {
+        var ip = getWledIp();
+        if (!ip) { if (cb) cb(false); return; }
+        var blank = new Blob(['{"map":[]}'], { type: 'application/json' });
+        var fd    = new FormData();
+        fd.append('data', blank, 'ledmap.json');
+        fetch('http://' + ip + '/edit', { method: 'POST', body: fd })
+            .then(function(r) {
+                console.log('[WLED] empty ledmap.json uploaded (no reboot), status:', r.status);
+                if (cb) cb(true);
+            })
+            .catch(function(e) {
+                console.warn('[WLED] empty ledmap upload error:', e);
                 if (cb) cb(false);
             });
     }
@@ -1607,7 +1650,7 @@
         var badge = document.getElementById('wiz-layout-wled-badge');
         if (!badge) return;
         var ip = getWledIp();
-        if (ip) {
+        if (ip && wiz.ctrlType === 'wled') {
             badge.style.display = '';
             badge.textContent = '⚡ WLED: ' + ip;
             badge.style.color = 'var(--wiz-green)';
@@ -1898,11 +1941,14 @@
                         _strobeCanvasAll(5000);
                     }
                 }
-                // 5 second wait after reboot — WLED flash starts once device is ready
+                // Wait 5 seconds after reboot, then upload empty ledmap (no reboot) and test
                 setTimeout(function() {
-                    _restoreTestButtons();
-                    if (btn) { btn.disabled = false; btn.textContent = origText; }
-                    testFn();  // ← WLED flash starts HERE after WLED is ready
+                    if (btn) btn.textContent = '⏳ Clearing map…';
+                    uploadEmptyLedmapNoReboot(function() {
+                        _restoreTestButtons();
+                        if (btn) { btn.disabled = false; btn.textContent = origText; }
+                        testFn();  // ← WLED flash starts HERE after WLED is ready
+                    });
                 }, 5000);
             } else {
                 // Upload failed — still run test, don't block user
@@ -1989,7 +2035,9 @@
         setText('sum-ctrl',     wiz.ctrlType || 'Not set');
         setText('sum-leds',     total + ' LEDs');
         setText('sum-layout',   'T:' + l.top + ' B:' + l.bottom + ' L:' + l.left + ' R:' + l.right);
-        setText('sum-wled',     wiz.wledIp ? (wiz.wledIp + (wiz.wledConnected ? ' ✓' : ' ✗')) : 'N/A');
+        var wledCard = document.querySelector('#sum-wled') && document.querySelector('#sum-wled').closest('.wiz-summary-card');
+        if (wledCard) wledCard.style.display = (wiz.ctrlType === 'wled') ? '' : 'none';
+        if (wiz.ctrlType === 'wled') setText('sum-wled', wiz.wledIp ? (wiz.wledIp + (wiz.wledConnected ? ' ✓' : ' ✗')) : 'N/A');
         setText('sum-status',   'Ready to save');
     }
 

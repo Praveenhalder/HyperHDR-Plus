@@ -1,0 +1,880 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+.qc-root{
+  --font:'Outfit',sans-serif;--mono:'JetBrains Mono',monospace;
+  --bg:#0a0c10;--surface:#111318;--surface-2:#181c24;--surface-3:#1e2330;
+  --border:rgba(255,255,255,.06);--border-hi:rgba(255,255,255,.12);--border-focus:rgba(77,168,245,.4);
+  --text:#e8eaf0;--text-dim:rgba(232,234,240,.55);--text-muted:rgba(232,234,240,.3);
+  --accent:#4da8f5;--accent-dim:rgba(77,168,245,.12);--accent-glow:rgba(77,168,245,.25);
+  --warm:#f5a623;--ok:#4ade80;--ok-dim:rgba(74,222,128,.1);--err:#f87171;--err-dim:rgba(248,113,113,.1);
+  --track:rgba(255,255,255,.07);--r:12px;--rs:8px;
+  font-family:var(--font);background:var(--bg);color:var(--text);padding:24px 24px 48px;min-height:100%;line-height:1.5;
+}
+body:not(.dark-mode) .qc-root{
+  --bg:#f1f4f8;--surface:#fff;--surface-2:#f5f7fb;--surface-3:#eef1f6;
+  --border:rgba(0,0,0,.06);--border-hi:rgba(0,0,0,.11);--border-focus:rgba(14,111,199,.35);
+  --text:#1a1f2e;--text-dim:rgba(26,31,46,.6);--text-muted:rgba(26,31,46,.35);
+  --accent:#0e6fc7;--accent-dim:rgba(14,111,199,.1);--accent-glow:rgba(14,111,199,.2);
+  --warm:#c76b00;--ok:#16a34a;--ok-dim:rgba(22,163,74,.08);--err:#dc2626;--err-dim:rgba(220,38,38,.08);
+  --track:rgba(0,0,0,.07);
+}
+/* HEADER */
+.qc-hdr{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:22px}
+.qc-hdr-l{display:flex;align-items:center;gap:14px}
+.qc-hicon{width:40px;height:40px;border-radius:10px;background:var(--accent-dim);border:1px solid rgba(77,168,245,.25);display:flex;align-items:center;justify-content:center;color:var(--accent);flex-shrink:0}
+.qc-hicon svg{width:18px;height:18px}
+.qc-htitle{font-size:1.15rem;font-weight:600;letter-spacing:-.025em;line-height:1.2}
+.qc-hsub{font-size:.72rem;color:var(--text-muted);margin-top:2px}
+.qc-hdr-r{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.qc-power{display:flex;align-items:center;gap:7px;padding:7px 14px;border-radius:20px;background:var(--surface);border:1px solid var(--border-hi);cursor:pointer;transition:all .2s;user-select:none;font-family:var(--font)}
+.qc-power svg{width:14px;height:14px;flex-shrink:0;transition:color .2s}
+.qc-power-lbl{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;transition:color .2s}
+.qc-power.is-on{border-color:rgba(74,222,128,.3);background:var(--ok-dim)}
+.qc-power.is-on svg,.qc-power.is-on .qc-power-lbl{color:var(--ok)}
+.qc-power.is-off{border-color:rgba(248,113,113,.3);background:var(--err-dim)}
+.qc-power.is-off svg,.qc-power.is-off .qc-power-lbl{color:var(--err)}
+.qc-power:hover{filter:brightness(1.1);transform:scale(1.02)}
+.qc-badge{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:20px;background:var(--surface);border:1px solid var(--border-hi);font-size:.68rem;font-weight:500;color:var(--text-dim);letter-spacing:.05em;text-transform:uppercase}
+.qc-dot{width:6px;height:6px;border-radius:50%;background:var(--ok);flex-shrink:0;box-shadow:0 0 6px var(--ok);animation:qc-pulse 2s ease-in-out infinite}
+@keyframes qc-pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.75)}}
+/* GRID */
+.qc-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.qc-col{display:flex;flex-direction:column;gap:14px}
+@media(max-width:800px){.qc-grid{grid-template-columns:1fr}}
+/* CARDS */
+.qc-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .2s,box-shadow .2s;animation:qc-in .3s ease both}
+.qc-card:hover{border-color:var(--border-hi);box-shadow:0 4px 24px rgba(0,0,0,.25)}
+@keyframes qc-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.qc-col .qc-card:nth-child(1){animation-delay:.05s}.qc-col .qc-card:nth-child(2){animation-delay:.1s}.qc-col .qc-card:nth-child(3){animation-delay:.15s}
+.qc-ch{display:flex;align-items:center;gap:8px;padding:13px 16px 12px;border-bottom:1px solid var(--border);font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted)}
+.qc-ci{width:13px;height:13px;opacity:.6;flex-shrink:0}
+.qc-ch-extra{margin-left:auto;display:flex;align-items:center;gap:6px}
+/* SLIDERS */
+.qc-sliders{padding:14px 16px 16px;display:flex;flex-direction:column;gap:18px}
+.qc-sr{display:flex;flex-direction:column;gap:6px}
+.qc-sl{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
+.qc-sn{font-size:.8rem;font-weight:500}
+.qc-sv{font-family:var(--mono);font-size:.7rem;font-weight:500;color:var(--accent);background:var(--accent-dim);padding:2px 8px;border-radius:5px;min-width:40px;text-align:center}
+.qc-stw{position:relative;height:6px;border-radius:3px;background:var(--track)}
+.qc-slider{-webkit-appearance:none;appearance:none;position:absolute;inset:0;width:100%;height:6px;background:transparent;cursor:pointer;z-index:2;margin:0}
+.qc-slider::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:transparent}
+.qc-slider::-moz-range-track{height:6px;border-radius:3px;background:transparent}
+.qc-fill{position:absolute;left:0;top:0;height:6px;border-radius:3px;background:linear-gradient(90deg,var(--accent),var(--warm));pointer-events:none;z-index:1;transition:width .05s}
+.qc-slider::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid var(--surface);box-shadow:0 0 0 1px var(--accent),0 2px 8px rgba(0,0,0,.4);margin-top:-5px;cursor:pointer;transition:transform .15s,box-shadow .15s}
+.qc-slider::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--accent);border:2px solid var(--surface);box-shadow:0 0 0 1px var(--accent),0 2px 8px rgba(0,0,0,.4);cursor:pointer}
+.qc-slider:hover::-webkit-slider-thumb,.qc-slider:focus::-webkit-slider-thumb{transform:scale(1.3);box-shadow:0 0 0 4px var(--accent-glow),0 2px 8px rgba(0,0,0,.4)}
+.qc-slider:focus{outline:none}
+.qc-bounds{display:flex;justify-content:space-between;font-size:.6rem;color:var(--text-muted);font-family:var(--mono);margin-top:4px}
+
+/* Toggle switch (used by WLED Effects) */
+.qc-sw{position:relative;display:inline-block;flex-shrink:0;cursor:pointer}
+.qc-sw input{opacity:0;width:0;height:0;position:absolute}
+.qc-tr{display:block;width:40px;height:22px;border-radius:11px;background:var(--track);border:1px solid var(--border-hi);position:relative;transition:background .2s,border-color .2s,box-shadow .2s}
+.qc-tt{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:var(--text-muted);transition:transform .22s cubic-bezier(.4,0,.2,1),background .2s;box-shadow:0 1px 4px rgba(0,0,0,.35)}
+.qc-sw input:checked+.qc-tr{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.qc-sw input:checked+.qc-tr .qc-tt{transform:translateX(18px);background:#fff}
+
+.wled-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:border-color .2s;animation:qc-in .3s ease .1s both;display:flex;flex-direction:column}
+.wled-card:hover{border-color:var(--border-hi)}
+
+/* Mode toggle row */
+.wled-mode-row{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--border);gap:10px;flex-shrink:0}
+.wled-mode-info{display:flex;align-items:center;gap:9px;flex:1;min-width:0}
+.wled-mode-icon{width:14px;height:14px;color:var(--accent);flex-shrink:0;opacity:.8}
+.wled-mode-label{font-size:.8rem;font-weight:500;white-space:nowrap}
+.wled-mode-desc{font-size:.67rem;color:var(--text-muted);margin-left:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Side-by-side columns */
+.wled-columns{display:flex;align-items:stretch;height:360px;flex-shrink:0;overflow:hidden;border-bottom:1px solid var(--border)}
+.wled-col{display:flex;flex-direction:column;flex:1;min-width:0;overflow:hidden}
+.wled-col-divider{width:1px;background:var(--border);flex-shrink:0}
+.wled-col-hdr{display:flex;align-items:center;gap:6px;padding:9px 12px 8px;font-size:.63rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text-muted);border-bottom:1px solid var(--border);flex-shrink:0}
+.wled-col-hdr svg{width:11px;height:11px;opacity:.6;flex-shrink:0}
+
+/* Search */
+.wled-search-wrap{padding:7px 10px 5px;position:relative;flex-shrink:0}
+.wled-search-wrap svg{position:absolute;left:20px;top:50%;transform:translateY(-50%);width:12px;height:12px;color:var(--text-muted);pointer-events:none}
+.wled-search{width:100%;background:var(--surface-2);border:1px solid var(--border-hi);border-radius:var(--rs);padding:6px 8px 6px 28px;font-size:.72rem;color:var(--text);outline:none;transition:border-color .18s;font-family:var(--font)}
+.wled-search::placeholder{color:var(--text-muted)}
+.wled-search:focus{border-color:var(--border-focus)}
+
+/* Effects list */
+.wled-fx-list{display:flex;flex-direction:column;gap:1px;padding:2px 6px 6px;overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:var(--border-hi) transparent}
+.wled-fx-list::-webkit-scrollbar{width:3px}
+.wled-fx-list::-webkit-scrollbar-thumb{border-radius:3px;background:var(--border-hi)}
+.wled-fx-row{display:flex;align-items:center;gap:8px;padding:6px 8px;border-radius:var(--rs);cursor:pointer;border:1px solid transparent;transition:background .12s,border-color .12s}
+.wled-fx-row:hover{background:var(--surface-2);border-color:var(--border)}
+.wled-fx-row.active{background:var(--accent-dim);border-color:rgba(77,168,245,.3)}
+.wled-fx-row.active .wled-fx-name{color:var(--accent)}
+.wled-fx-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;background:var(--track);border:1px solid var(--border-hi);transition:all .15s}
+.wled-fx-row.active .wled-fx-dot{background:var(--accent);border-color:var(--accent);box-shadow:0 0 5px var(--accent-glow)}
+.wled-fx-name{font-size:.75rem;font-weight:500;color:var(--text-dim);flex:1;transition:color .12s;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wled-fx-idx{font-family:var(--mono);font-size:.58rem;color:var(--text-muted);flex-shrink:0}
+
+/* Palettes list — vertical scrollable like effects */
+.wled-pal-list{display:flex;flex-direction:column;gap:3px;padding:4px 6px 6px;overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:var(--border-hi) transparent}
+.wled-pal-list::-webkit-scrollbar{width:3px}
+.wled-pal-list::-webkit-scrollbar-thumb{border-radius:3px;background:var(--border-hi)}
+.wled-pal-item{display:flex;align-items:center;gap:8px;padding:5px 8px;border-radius:var(--rs);cursor:pointer;border:1px solid transparent;transition:background .12s,border-color .12s}
+.wled-pal-item:hover{background:var(--surface-2);border-color:var(--border)}
+.wled-pal-item.active{background:var(--accent-dim);border-color:rgba(77,168,245,.3)}
+.wled-pal-item.active .wled-pal-name{color:var(--accent);font-weight:600}
+.wled-pal-swatch{height:16px;width:42px;border-radius:4px;flex-shrink:0}
+.wled-pal-name{font-size:.75rem;font-weight:500;color:var(--text-dim);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* Color wheel column */
+.wled-color-col{display:flex;flex-direction:column;flex:0 0 160px;min-width:0;overflow:hidden}
+.wled-wheel-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px 12px 14px;flex:1;justify-content:center}
+.wled-wheel-canvas{border-radius:50%;cursor:crosshair;display:block;touch-action:none}
+.wled-wheel-preview{width:100%;height:28px;border-radius:6px;border:1px solid var(--border-hi);transition:background .1s;cursor:pointer;position:relative;overflow:hidden}
+.wled-wheel-preview-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:.62rem;font-weight:600;letter-spacing:.04em;mix-blend-mode:difference;color:#fff;opacity:.7;text-transform:uppercase;font-family:var(--mono)}
+.wled-wheel-brightness{width:100%;display:flex;flex-direction:column;gap:4px}
+.wled-wheel-brightness-lbl{font-size:.6rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-muted);display:flex;justify-content:space-between}
+.wled-wheel-brightness-lbl span{font-family:var(--mono);font-weight:500;letter-spacing:0}
+
+/* Color bottom section */
+.wled-color-bottom{flex-shrink:0}
+.wled-color-bottom-inner{display:flex;align-items:center;gap:16px;padding:12px 14px 16px}
+.wled-color-bottom-right{display:flex;flex-direction:column;gap:10px;flex:1;min-width:0}
+.wled-color-bottom .wled-wheel-preview{height:28px}
+.wled-color-bottom .wled-wheel-brightness{width:100%}
+
+
+
+/* Effect param sliders */
+.wled-sliders{padding:10px 14px 14px;display:flex;flex-direction:column;gap:10px;flex-shrink:0}
+.wled-slider-row{display:flex;align-items:center;gap:10px}
+.wled-slider-lbl{font-size:.68rem;color:var(--text-muted);font-family:var(--mono);white-space:nowrap;min-width:54px}
+
+/* WLED pill */
+.qc-wled-pill{font-size:.62rem;font-family:var(--mono);padding:3px 9px;border-radius:10px;border:1px solid var(--border-hi);color:var(--text-muted);transition:color .2s,border-color .2s;white-space:nowrap;flex-shrink:0}
+.qc-wled-pill.ok{color:var(--ok);border-color:rgba(74,222,128,.3)}
+.qc-wled-pill.err{color:var(--err);border-color:rgba(248,113,113,.3)}
+.qc-wled-pill.loading{animation:qc-pulse 1s ease-in-out infinite}
+
+/* TEMPERATURE CARDS */
+.qc-temp-section{padding:10px 14px 16px}
+.qc-temp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px}
+.qc-temp-card{display:flex;flex-direction:column;align-items:center;gap:6px;padding:11px 6px 10px;border-radius:9px;background:var(--surface-2);border:1px solid var(--border);cursor:pointer;transition:background .15s,border-color .15s,transform .12s,box-shadow .15s;user-select:none;position:relative;overflow:hidden}
+.qc-temp-card:hover{background:var(--surface-3);border-color:var(--border-hi);transform:translateY(-2px);box-shadow:0 5px 16px rgba(0,0,0,.25)}
+.qc-temp-card.active{border-color:var(--accent);background:var(--accent-dim);box-shadow:0 0 0 2px var(--accent-glow)}
+.qc-temp-swatch{width:26px;height:26px;border-radius:6px;flex-shrink:0;box-shadow:0 2px 6px rgba(0,0,0,.3)}
+.qc-temp-label{font-size:.67rem;font-weight:500;color:var(--text-dim);text-align:center;line-height:1.2;width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qc-temp-card.active .qc-temp-label{color:var(--accent);font-weight:600}
+.qc-temp-kelvin{font-family:var(--mono);font-size:.58rem;color:var(--text-muted)}
+.qc-temp-card.active .qc-temp-kelvin{color:var(--accent);opacity:.8}
+
+/* TOAST */
+.qc-toast{position:fixed;bottom:22px;right:22px;padding:9px 16px;border-radius:var(--rs);background:var(--surface-3);border:1px solid var(--border-hi);color:var(--text);font-size:.74rem;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.4);opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none;z-index:9999;max-width:260px;font-family:var(--font)}
+.qc-toast.show{opacity:1;transform:translateY(0)}
+
+/* SAVE ROW */
+.qc-save-row{padding:12px 16px 14px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:7px}
+.qc-save-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:9px 16px;border-radius:var(--rs);background:var(--accent-dim);border:1px solid rgba(77,168,245,.3);color:var(--accent);font-family:var(--font);font-size:.78rem;font-weight:600;cursor:pointer;transition:background .18s,border-color .18s,transform .12s,box-shadow .18s;letter-spacing:.01em}
+.qc-save-btn svg{width:14px;height:14px;flex-shrink:0}
+.qc-save-btn:hover{background:rgba(77,168,245,.2);border-color:rgba(77,168,245,.5);transform:translateY(-1px);box-shadow:0 4px 16px rgba(77,168,245,.15)}
+.qc-save-btn:active{transform:translateY(0);box-shadow:none}
+.qc-save-btn.saved{background:var(--ok-dim);border-color:rgba(74,222,128,.35);color:var(--ok)}
+body:not(.dark-mode) .qc-save-btn{background:var(--accent-dim);border-color:rgba(14,111,199,.25);color:var(--accent)}
+body:not(.dark-mode) .qc-save-btn:hover{background:rgba(14,111,199,.18);border-color:rgba(14,111,199,.45)}
+.qc-save-hint{font-size:.63rem;color:var(--text-muted);text-align:center;line-height:1.4}
+
+/* ── DARK MODE GLOW EFFECTS (dark is default; suppressed in light mode) ──── */
+
+/* Save button — vivid blue glow */
+.qc-save-btn {
+  -webkit-box-shadow:0px 0px 22px 0px rgba(77,168,245,0.5),0px 0px 8px 0px rgba(77,168,245,0.35);
+  -moz-box-shadow:   0px 0px 22px 0px rgba(77,168,245,0.5),0px 0px 8px 0px rgba(77,168,245,0.35);
+  box-shadow:        0px 0px 22px 0px rgba(77,168,245,0.5),0px 0px 8px 0px rgba(77,168,245,0.35);
+}
+.qc-save-btn:hover {
+  -webkit-box-shadow:0px 0px 36px 0px rgba(77,168,245,0.75),0px 0px 14px 0px rgba(77,168,245,0.55) !important;
+  -moz-box-shadow:   0px 0px 36px 0px rgba(77,168,245,0.75),0px 0px 14px 0px rgba(77,168,245,0.55) !important;
+  box-shadow:        0px 0px 36px 0px rgba(77,168,245,0.75),0px 0px 14px 0px rgba(77,168,245,0.55) !important;
+}
+/* Save button saved state — green glow */
+.qc-save-btn.saved {
+  -webkit-box-shadow:0px 0px 64px 0px rgba(74,222,128,0.7),0px 0px 16px 0px rgba(74,222,128,0.5) !important;
+  -moz-box-shadow:   0px 0px 64px 0px rgba(74,222,128,0.7),0px 0px 16px 0px rgba(74,222,128,0.5) !important;
+  box-shadow:        0px 0px 64px 0px rgba(74,222,128,0.7),0px 0px 16px 0px rgba(74,222,128,0.5) !important;
+}
+
+/* Power ON — vivid green glow */
+.qc-power.is-on {
+  -webkit-box-shadow:0px 0px 48px 0px rgba(74,222,128,0.6),0px 0px 14px 0px rgba(74,222,128,0.45);
+  -moz-box-shadow:   0px 0px 48px 0px rgba(74,222,128,0.6),0px 0px 14px 0px rgba(74,222,128,0.45);
+  box-shadow:        0px 0px 48px 0px rgba(74,222,128,0.6),0px 0px 14px 0px rgba(74,222,128,0.45);
+}
+/* Power OFF — vivid red glow */
+.qc-power.is-off {
+  -webkit-box-shadow:0px 0px 48px 0px rgba(248,113,113,0.6),0px 0px 14px 0px rgba(248,113,113,0.45);
+  -moz-box-shadow:   0px 0px 48px 0px rgba(248,113,113,0.6),0px 0px 14px 0px rgba(248,113,113,0.45);
+  box-shadow:        0px 0px 48px 0px rgba(248,113,113,0.6),0px 0px 14px 0px rgba(248,113,113,0.45);
+}
+
+/* Live badge dot — pulsing green dot glow */
+.qc-dot {
+  box-shadow:0 0 10px 2px rgba(74,222,128,0.9),0 0 22px 4px rgba(74,222,128,0.5);
+}
+
+/* Header lightning icon — blue glow */
+.qc-hicon {
+  -webkit-box-shadow:0px 0px 40px 0px rgba(77,168,245,0.5),0px 0px 10px 0px rgba(77,168,245,0.35);
+  -moz-box-shadow:   0px 0px 40px 0px rgba(77,168,245,0.5),0px 0px 10px 0px rgba(77,168,245,0.35);
+  box-shadow:        0px 0px 40px 0px rgba(77,168,245,0.5),0px 0px 10px 0px rgba(77,168,245,0.35);
+}
+
+/* Slider value pill — blue glow */
+.qc-sv {
+  -webkit-box-shadow:0px 0px 20px 0px rgba(77,168,245,0.5),0px 0px 6px 0px rgba(77,168,245,0.4);
+  -moz-box-shadow:   0px 0px 20px 0px rgba(77,168,245,0.5),0px 0px 6px 0px rgba(77,168,245,0.4);
+  box-shadow:        0px 0px 20px 0px rgba(77,168,245,0.5),0px 0px 6px 0px rgba(77,168,245,0.4);
+}
+
+/* Active temperature card — accent blue glow */
+.qc-temp-card.active {
+  -webkit-box-shadow:0px 0px 48px 0px rgba(77,168,245,0.5),0 0 0 2px rgba(77,168,245,0.4);
+  -moz-box-shadow:   0px 0px 48px 0px rgba(77,168,245,0.5),0 0 0 2px rgba(77,168,245,0.4);
+  box-shadow:        0px 0px 48px 0px rgba(77,168,245,0.5),0 0 0 2px rgba(77,168,245,0.4);
+}
+.qc-temp-card:hover {
+  -webkit-box-shadow:0px 0px 28px 0px rgba(77,168,245,0.3),0 6px 20px rgba(0,0,0,.4);
+  -moz-box-shadow:   0px 0px 28px 0px rgba(77,168,245,0.3),0 6px 20px rgba(0,0,0,.4);
+  box-shadow:        0px 0px 28px 0px rgba(77,168,245,0.3),0 6px 20px rgba(0,0,0,.4);
+}
+
+/* Slider thumb — blue glow on hover/focus */
+.qc-slider:hover::-webkit-slider-thumb,
+.qc-slider:focus::-webkit-slider-thumb {
+  box-shadow:0 0 0 4px rgba(77,168,245,0.35),0px 0px 28px 0px rgba(77,168,245,0.75),0 2px 8px rgba(0,0,0,.5);
+}
+
+/* Toggle switch checked — blue glow */
+.qc-sw input:checked+.qc-tr {
+  -webkit-box-shadow:0px 0px 32px 0px rgba(77,168,245,0.65),0 0 0 3px rgba(77,168,245,0.3);
+  -moz-box-shadow:   0px 0px 32px 0px rgba(77,168,245,0.65),0 0 0 3px rgba(77,168,245,0.3);
+  box-shadow:        0px 0px 32px 0px rgba(77,168,245,0.65),0 0 0 3px rgba(77,168,245,0.3);
+}
+
+/* Active effect / palette rows — blue glow */
+.wled-fx-row.active {
+  -webkit-box-shadow:0px 0px 24px 0px rgba(77,168,245,0.3);
+  -moz-box-shadow:   0px 0px 24px 0px rgba(77,168,245,0.3);
+  box-shadow:        0px 0px 24px 0px rgba(77,168,245,0.3);
+}
+.wled-pal-item.active {
+  -webkit-box-shadow:0px 0px 24px 0px rgba(77,168,245,0.3);
+  -moz-box-shadow:   0px 0px 24px 0px rgba(77,168,245,0.3);
+  box-shadow:        0px 0px 24px 0px rgba(77,168,245,0.3);
+}
+
+/* Active fx dot — blue glow */
+.wled-fx-row.active .wled-fx-dot {
+  box-shadow:0 0 10px 2px rgba(77,168,245,0.8),0 0 4px rgba(77,168,245,1);
+}
+
+/* WLED pill states */
+.qc-wled-pill.ok {
+  -webkit-box-shadow:0px 0px 20px 0px rgba(74,222,128,0.55);
+  -moz-box-shadow:   0px 0px 20px 0px rgba(74,222,128,0.55);
+  box-shadow:        0px 0px 20px 0px rgba(74,222,128,0.55);
+}
+.qc-wled-pill.err {
+  -webkit-box-shadow:0px 0px 20px 0px rgba(248,113,113,0.55);
+  -moz-box-shadow:   0px 0px 20px 0px rgba(248,113,113,0.55);
+  box-shadow:        0px 0px 20px 0px rgba(248,113,113,0.55);
+}
+
+/* ── Suppress all glows in light mode ── */
+body:not(.dark-mode) .qc-save-btn,
+body:not(.dark-mode) .qc-save-btn:hover,
+body:not(.dark-mode) .qc-save-btn.saved,
+body:not(.dark-mode) .qc-power.is-on,
+body:not(.dark-mode) .qc-power.is-off,
+body:not(.dark-mode) .qc-hicon,
+body:not(.dark-mode) .qc-sv,
+body:not(.dark-mode) .qc-dot,
+body:not(.dark-mode) .qc-temp-card.active,
+body:not(.dark-mode) .qc-temp-card:hover,
+body:not(.dark-mode) .qc-sw input:checked+.qc-tr,
+body:not(.dark-mode) .wled-fx-row.active,
+body:not(.dark-mode) .wled-pal-item.active,
+body:not(.dark-mode) .wled-fx-row.active .wled-fx-dot,
+body:not(.dark-mode) .qc-wled-pill.ok,
+body:not(.dark-mode) .qc-wled-pill.err { box-shadow:none !important; -webkit-box-shadow:none !important; -moz-box-shadow:none !important; }
+body:not(.dark-mode) .qc-slider:hover::-webkit-slider-thumb,
+body:not(.dark-mode) .qc-slider:focus::-webkit-slider-thumb {
+  box-shadow:0 0 0 4px var(--accent-glow),0 2px 8px rgba(0,0,0,.2);
+}
+</style>
+
+<div id="hyper-subpage" class="qc-root">
+  <!-- Header -->
+  <div class="qc-hdr">
+    <div class="qc-hdr-l">
+      <div class="qc-hicon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+      <div>
+        <h1 class="qc-htitle">Quick Controls</h1>
+        <p class="qc-hsub">Real-time adjustment &amp; lighting control</p>
+      </div>
+    </div>
+    <div class="qc-hdr-r">
+      <div class="qc-power is-on" id="qc-power">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+        <span class="qc-power-lbl" id="qc-power-lbl">ON</span>
+      </div>
+      <div class="qc-badge"><span class="qc-dot"></span><span>Live</span></div>
+    </div>
+  </div>
+
+  <div class="qc-grid">
+    <!-- LEFT -->
+    <div class="qc-col">
+      <div class="qc-card">
+        <div class="qc-ch">
+          <svg class="qc-ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"/><circle cx="8" cy="6" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="12" x2="20" y2="12"/><circle cx="16" cy="12" r="2" fill="currentColor" stroke="none"/><line x1="4" y1="18" x2="20" y2="18"/><circle cx="10" cy="18" r="2" fill="currentColor" stroke="none"/></svg>
+          Adjustments
+        </div>
+        <div class="qc-sliders" id="qc-sliders"></div>
+
+        <!-- White Temperature merged — no gap -->
+        <div class="qc-ch" style="border-top:1px solid var(--border);border-bottom:none;margin-top:0">
+          <svg class="qc-ci" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+          White Temperature
+        </div>
+        <div class="qc-temp-section">
+          <div class="qc-temp-grid" id="qc-temp-grid"></div>
+        </div>
+
+        <!-- Save button -->
+        <div class="qc-save-row">
+          <button class="qc-save-btn" id="qc-save-config">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            Save Adjustments
+          </button>
+          <span class="qc-save-hint">Writes adjustments &amp; temperature permanently to HyperHDR config</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT — WLED card -->
+    <div class="qc-col">
+      <div class="wled-card">
+
+        <!-- WLED Effects toggle row — always visible at top -->
+        <div class="wled-mode-row">
+          <div class="wled-mode-info">
+            <svg class="wled-mode-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span class="wled-mode-label">WLED Effects</span>
+            <span class="wled-mode-desc" id="qc-effect-desc">OFF — HyperHDR active</span>
+          </div>
+          <span class="qc-wled-pill loading" id="qc-wled-pill">WLED…</span>
+          <label class="qc-sw" for="tog-wled-fx">
+            <input type="checkbox" id="tog-wled-fx">
+            <span class="qc-tr"><span class="qc-tt"></span></span>
+          </label>
+        </div>
+
+        <!-- Effects + Palettes side by side -->
+        <div class="wled-columns">
+
+          <!-- Effects column -->
+          <div class="wled-col">
+            <div class="wled-col-hdr">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              Effects
+            </div>
+            <div class="wled-search-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="wled-search" id="qc-fx-search" type="text" placeholder="Search…">
+            </div>
+            <div class="wled-fx-list" id="qc-fx-list"><div class="wled-empty">Loading…</div></div>
+          </div>
+
+          <!-- Divider -->
+          <div class="wled-col-divider"></div>
+
+          <!-- Palettes column -->
+          <div class="wled-col">
+            <div class="wled-col-hdr">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="8.5" cy="10" r="1.5" fill="currentColor" stroke="none"/><circle cx="12" cy="7" r="1.5" fill="currentColor" stroke="none"/><circle cx="15.5" cy="10" r="1.5" fill="currentColor" stroke="none"/><circle cx="14" cy="15" r="1.5" fill="currentColor" stroke="none"/><circle cx="10" cy="15" r="1.5" fill="currentColor" stroke="none"/></svg>
+              Palettes
+            </div>
+            <div class="wled-search-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input class="wled-search" id="qc-pal-search" type="text" placeholder="Search…">
+            </div>
+            <div class="wled-pal-list" id="qc-pal-list"><div class="wled-empty">Loading…</div></div>
+          </div>
+
+
+        </div>
+        <div class="wled-sliders">
+          <div class="wled-slider-row">
+            <span class="wled-slider-lbl">Brightness</span>
+            <div class="qc-stw" style="flex:1"><input type="range" class="qc-slider" id="sl-bx" min="0" max="255" step="1" value="128"><div class="qc-fill" id="fill-bx" style="width:50%"></div></div>
+            <span class="qc-sv" id="val-bx">128</span>
+          </div>
+          <div class="wled-slider-row">
+            <span class="wled-slider-lbl">Speed</span>
+            <div class="qc-stw" style="flex:1"><input type="range" class="qc-slider" id="sl-sx" min="0" max="255" step="1" value="128"><div class="qc-fill" id="fill-sx" style="width:50%"></div></div>
+            <span class="qc-sv" id="val-sx">128</span>
+          </div>
+          <div class="wled-slider-row">
+            <span class="wled-slider-lbl">Intensity</span>
+            <div class="qc-stw" style="flex:1"><input type="range" class="qc-slider" id="sl-ix" min="0" max="255" step="1" value="128"><div class="qc-fill" id="fill-ix" style="width:50%"></div></div>
+            <span class="qc-sv" id="val-ix">128</span>
+          </div>
+        </div>
+
+        <!-- Color selector — below sliders -->
+        <div class="wled-color-bottom">
+          <div class="wled-col-hdr" style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);">
+            <svg style="width:11px;height:11px;opacity:.6;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="10"/></svg>
+            Color
+          </div>
+          <div class="wled-color-bottom-inner">
+            <canvas id="qc-color-wheel" class="wled-wheel-canvas" width="120" height="120"></canvas>
+            <div class="wled-color-bottom-right">
+              <div class="wled-wheel-preview" id="qc-color-preview">
+                <div class="wled-wheel-preview-inner" id="qc-color-hex">#FFFFFF</div>
+              </div>
+              <div class="wled-wheel-brightness">
+                <div class="wled-wheel-brightness-lbl">
+                  <span>Brightness</span>
+                  <span id="qc-wheel-bv">255</span>
+                </div>
+                <div class="qc-stw"><input type="range" class="qc-slider" id="sl-wheel-v" min="0" max="255" step="1" value="255"><div class="qc-fill" id="fill-wheel-v" style="width:100%"></div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+  <div class="qc-toast" id="qc-toast"></div>
+</div>
+
+<script>
+(function(){
+
+/* Palette → gradient color map */
+var PAL_COLORS = {
+  'Default':['#ff0000','#ff8800','#ffff00','#00ff00','#0000ff','#ff00ff'],
+  'Random Cycle':['#ff0000','#ff7700','#ffff00','#00ff88','#0088ff','#cc00ff'],
+  'Color 1':['#ff3333','#ff3333','#ff6666'],
+  'Colors 1&2':['#ff3333','#3333ff'],
+  'Color Gradient':['#ff0000','#ff8800','#ffff00','#00ff00','#0088ff','#8800ff'],
+  'Colors Only':['#ff0000','#00ff00','#0000ff'],
+  'Party':['#ff0077','#ff3300','#ff9900','#ffff00','#cc00ff'],
+  'Cloud':['#aaccff','#8899ff','#6677ee','#4455cc'],
+  'Lava':['#550000','#aa0000','#ff2200','#ff8800','#ffdd00'],
+  'Ocean':['#001133','#003366','#006699','#0099cc','#66ccff'],
+  'Forest':['#001100','#003300','#006600','#009900','#33cc00'],
+  'Rainbow':['#ff0000','#ff8800','#ffff00','#00ff00','#0088ff','#8800ff'],
+  'Rainbow Bands':['#ff0000','#000000','#ff8800','#000000','#ffff00','#000000'],
+  'Sunset':['#ff4400','#ff8800','#ffcc00','#ff0055','#880033'],
+  'Rivendell':['#335544','#557766','#779988','#99bbaa'],
+  'Breeze':['#aaeeff','#88ccee','#66aacc','#4488aa'],
+  'Red & Blue':['#ff0000','#000000','#0000ff'],
+  'Yellowout':['#ffff00','#ffee00','#ffdd00','#ffcc00'],
+  'Analogous':['#ff0000','#ff4400','#ff8800','#ffcc00'],
+  'Splash':['#0000ff','#00ffff','#ffffff','#ff8800','#ff0000'],
+  'Pastel':['#ffaaaa','#ffccaa','#ffffaa','#aaffaa','#aaaaff'],
+  'Sunset 2':['#ff2200','#ff6600','#ffbb00','#ff0066'],
+  'Beech':['#ddbb88','#cc9966','#bbaa77','#cccc88'],
+  'Vintage':['#cc8844','#bb6633','#aa5522','#993311'],
+  'Departure':['#ff6600','#ffaa00','#ffff00','#88ff00'],
+  'Landscape':['#221100','#663300','#225500','#336600','#aabb55'],
+  'Beach':['#ddddaa','#bbcc88','#88aacc','#4488bb'],
+  'Sherbet':['#ff66aa','#ffaa44','#ffff44','#aaff44'],
+  'Jul':['#ff0000','#ffffff','#00aa00'],
+  'Fire':['#000000','#330000','#880000','#ff2200','#ff8800','#ffff00'],
+  'Icefire':['#000033','#0000aa','#4444ff','#ff8800','#ff2200'],
+  'Cyane':['#00ffff','#00aacc','#008899','#005566'],
+  'Light Pink':['#ffcccc','#ffaaaa','#ff9999'],
+  'Autumn':['#ff4400','#ff8800','#ffbb00','#cc6600'],
+  'Magenta':['#ff00ff','#cc00cc','#880088'],
+  'Temperature':['#0000ff','#0088ff','#00ffff','#ffff00','#ff8800','#ff0000'],
+  'Aurora':['#00ff88','#00ffcc','#0088ff','#8800ff'],
+  'Aurora 2':['#00ff44','#00ffaa','#00aaff','#4400ff'],
+  'Tiamat':['#001133','#0033aa','#cc0077','#ff4400','#ffff00'],
+  'April Night':['#000033','#000066','#110044','#440011'],
+  'Orangery':['#ff6600','#ff9900','#ffcc00','#ff4400'],
+  'C9':['#ff0000','#ff8800','#00aa00','#0000ff'],
+  'Sakura':['#ffccdd','#ffaacc','#ff88bb','#ee6699'],
+  'Atlantica':['#004466','#006688','#0088aa','#00aacc'],
+  'Retro Clown':['#ff0000','#ffaa00','#ffff00'],
+  'Candy':['#ff88cc','#ff44aa','#ff0088','#ff44cc'],
+  'Party':['#ff0077','#ff3300','#ff9900','#ffff00','#cc00ff'],
+  'Fairy Reaf':['#ff88ff','#ffaacc','#ffccff','#aaffcc'],
+  'Aqua Flash':['#00ffff','#00ccff','#0088ff'],
+  'Lite Light':['#ffffff','#eeeeff','#ddeeff'],
+  'Candy2':['#ff0077','#ff7700','#ffff00','#00ff77'],
+};
+
+function getPalGradient(name) {
+  if (PAL_COLORS[name]) return PAL_COLORS[name];
+  var hash = 0;
+  for (var i = 0; i < name.length; i++) hash = ((hash<<5)-hash) + name.charCodeAt(i);
+  var hue = Math.abs(hash) % 360;
+  return ['hsl('+hue+',90%,50%)','hsl('+((hue+60)%360)+',85%,55%)','hsl('+((hue+120)%360)+',90%,50%)','hsl('+((hue+180)%360)+',80%,55%)'];
+}
+
+/* CONFIG */
+var SLIDERS=[
+  {key:'luminanceGain',lbl:'Brightness',min:0,max:100,step:1,dec:0,toD:function(v){return Math.round(parseFloat(v)*100)},toS:function(v){return(parseFloat(v)/100).toFixed(4)}},
+  {key:'gamma',lbl:'Gamma',min:0.1,max:5.0,step:0.05,dec:2,toD:function(v){return parseFloat(v)},toS:function(v){return parseFloat(v).toFixed(2)}},
+  {key:'saturationGain',lbl:'Saturation',min:0,max:200,step:1,dec:0,toD:function(v){return Math.round(parseFloat(v)*100)},toS:function(v){return(parseFloat(v)/100).toFixed(4)}},
+  {key:'backlightThreshold',lbl:'Min Backlight',min:0,max:100,step:1,dec:0,toD:function(v){return Math.round(parseFloat(v)*100)},toS:function(v){return(parseFloat(v)/100).toFixed(4)}}
+];
+
+/* TEMPERATURE PRESETS — key: 'white', value: '[r,g,b]' (same as old version) */
+var TEMP_PRESETS=[
+  {label:'Candle',    k:'1900K', r:255, g:147, b: 41, swatch:'#FF9329'},
+  {label:'Warm White',k:'2700K', r:255, g:197, b:143, swatch:'#FFC58F'},
+  {label:'Halogen',   k:'3200K', r:255, g:214, b:170, swatch:'#FFD6AA'},
+  {label:'Neutral',   k:'4000K', r:255, g:228, b:206, swatch:'#FFE4CE'},
+  {label:'Daylight',  k:'5500K', r:255, g:244, b:232, swatch:'#FFF4E8'},
+  {label:'Cool White',k:'6500K', r:255, g:255, b:255, swatch:'#FFFFFF'},
+  {label:'Sky Blue',  k:'8000K', r:202, g:218, b:255, swatch:'#CADAFF'},
+];
+
+function buildTempCards(){
+  var grid=document.getElementById('qc-temp-grid');if(!grid)return;
+  grid.innerHTML='';
+  TEMP_PRESETS.forEach(function(p,i){
+    var c=document.createElement('div');
+    c.className='qc-temp-card';
+    c.dataset.idx=i;
+    c.innerHTML='<div class="qc-temp-swatch" style="background:'+p.swatch+'"></div>'
+               +'<div class="qc-temp-label">'+p.label+'</div>'
+               +'<div class="qc-temp-kelvin">'+p.k+'</div>';
+    c.addEventListener('click',function(){selectTemp(i);});
+    grid.appendChild(c);
+  });
+}
+
+function selectTemp(idx){
+  var p=TEMP_PRESETS[idx];
+  document.querySelectorAll('.qc-temp-card').forEach(function(c){
+    c.classList.toggle('active',parseInt(c.dataset.idx)===idx);
+  });
+  requestAdjustment('white','['+p.r+','+p.g+','+p.b+']');
+  toast(p.label+' ('+p.k+')');
+}
+
+function highlightTemp(adj){
+  if(!adj||!Array.isArray(adj.white)||adj.white.length<3)return;
+  var w=adj.white,best=-1,dist=Infinity;
+  TEMP_PRESETS.forEach(function(p,i){
+    var d=Math.abs(p.r-w[0])+Math.abs(p.g-w[1])+Math.abs(p.b-w[2]);
+    if(d<dist){dist=d;best=i;}
+  });
+  document.querySelectorAll('.qc-temp-card').forEach(function(c){
+    c.classList.toggle('active',dist<30&&parseInt(c.dataset.idx)===best);
+  });
+}
+
+/* STATE */
+var _dt={},_toastTmr=null,masterOn=true,wledHost=null;
+var wledEffects=[],wledPalettes=[],curFx=0,curPal=0;
+function init(){buildSliders();buildTempCards();initMaster();initEffectToggle();initEffectSliders();initSearch();initColorWheel();populate();attachAdjListener();attachCompListener();getWledHost();removeOverlay();}
+
+function initEffectToggle(){var tog=document.getElementById('tog-wled-fx'),desc=document.getElementById('qc-effect-desc');if(!tog)return;tog.checked=false;tog.addEventListener('change',async function(){var on=this.checked;tog.disabled=true;if(on){desc.textContent='Switching…';requestSetComponentState('ALL',false);await new Promise(function(r){setTimeout(r,400);});await wledPost({rb:true});await new Promise(function(r){setTimeout(r,3000);});await wledPost({on:true,seg:[{fx:curFx,pal:curPal}]});desc.textContent='ON — WLED effects active';toast('WLED Effects ON');}else{desc.textContent='Switching…';await wledPost({on:false});await new Promise(function(r){setTimeout(r,2000);});requestSetComponentState('ALL',true);desc.textContent='OFF — HyperHDR active';toast('HyperHDR restored');}tog.disabled=false;});}
+
+function initMaster(){if(window.comps)window.comps.forEach(function(c){if(c.name==='ALL'){masterOn=c.enabled;}});updatePowerBtn();document.getElementById('qc-power').addEventListener('click',function(){masterOn=!masterOn;requestSetComponentState('ALL',masterOn);updatePowerBtn();toast('HyperHDR '+(masterOn?'ON':'OFF'));});}
+function updatePowerBtn(){var btn=document.getElementById('qc-power'),lbl=document.getElementById('qc-power-lbl');if(!btn||!lbl)return;btn.className='qc-power '+(masterOn?'is-on':'is-off');lbl.textContent=masterOn?'ON':'OFF';}
+
+/* WLED */
+function getWledHost(){
+  if(window.serverConfig&&window.serverConfig.device&&window.serverConfig.device.host){wledHost=window.serverConfig.device.host;}
+  else{try{var dev=window.serverInfo&&window.serverInfo.config&&window.serverInfo.config.device;if(dev&&dev.host)wledHost=dev.host;}catch(e){}}
+  fetchWled();
+}
+async function wledGet(path){if(!wledHost)return null;try{var r=await fetch('http://'+wledHost+path,{signal:AbortSignal.timeout(3500)});return await r.json();}catch(e){return null;}}
+async function wledPost(payload){if(!wledHost)return;try{fetch('http://'+wledHost+'/json/state',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});}catch(e){}}
+
+async function fetchWled(){
+  setPill('loading','WLED…');
+  var d=await wledGet('/json');
+  if(!d){setPill('err','WLED ✕');renderFx(null);renderPal(null);return;}
+  wledEffects=(d.effects||[]).reduce(function(acc,n,i){if(n!=='RSVD'&&n!=='-')acc.push({id:i,name:n});return acc;},[]);
+  wledPalettes=(d.palettes||[]).map(function(n,i){return{id:i,name:n};});
+  if(d.state){var s=d.state;if(s.seg&&s.seg[0]){curFx=s.seg[0].fx||0;curPal=s.seg[0].pal||0;setRange('sx',s.seg[0].sx!==undefined?s.seg[0].sx:128);setRange('ix',s.seg[0].ix!==undefined?s.seg[0].ix:128);setRange('bx',s.bri!==undefined?s.bri:128);}}
+  renderFx('');renderPal('');setPill('ok','WLED ✓');
+}
+function setPill(cls,txt){var el=document.getElementById('qc-wled-pill');if(el){el.className='qc-wled-pill '+cls;el.textContent=txt;}}
+
+/* RENDER EFFECTS */
+function renderFx(filter){
+  var el=document.getElementById('qc-fx-list');if(!el)return;
+  if(filter===null){el.innerHTML='<div class="wled-empty" style="color:var(--err)">Cannot reach WLED device</div>';return;}
+  var list=wledEffects.filter(function(e){return filter===''||e.name.toLowerCase().includes(filter.toLowerCase());});
+  if(!list.length){el.innerHTML='<div class="wled-empty">No matches</div>';return;}
+  el.innerHTML=list.map(function(e){return'<div class="wled-fx-row'+(e.id===curFx?' active':'')+'" data-fx="'+e.id+'"><span class="wled-fx-dot"></span><span class="wled-fx-name">'+escHtml(e.name)+'</span><span class="wled-fx-idx">#'+e.id+'</span></div>';}).join('');
+  el.querySelectorAll('.wled-fx-row').forEach(function(c){c.addEventListener('click',function(){setFx(parseInt(this.dataset.fx));});});
+  var active=el.querySelector('.active');if(active)setTimeout(function(){active.scrollIntoView({block:'nearest',behavior:'smooth'});},50);
+}
+
+/* RENDER PALETTES */
+function renderPal(filter){
+  var el=document.getElementById('qc-pal-list');if(!el)return;
+  if(filter===null){el.innerHTML='<div class="wled-empty" style="color:var(--err)">Cannot reach WLED device</div>';return;}
+  var list=wledPalettes.filter(function(e){return filter===''||e.name.toLowerCase().includes(filter.toLowerCase());});
+  if(!list.length){el.innerHTML='<div class="wled-empty">No matches</div>';return;}
+  el.innerHTML=list.map(function(e){
+    var colors=getPalGradient(e.name);
+    var grad='linear-gradient(90deg,'+colors.join(',')+')';
+    return'<div class="wled-pal-item'+(e.id===curPal?' active':'')+'" data-pal="'+e.id+'"><div class="wled-pal-swatch" style="background:'+grad+'"></div><div class="wled-pal-name">'+escHtml(e.name)+'</div></div>';
+  }).join('');
+  el.querySelectorAll('.wled-pal-item').forEach(function(c){c.addEventListener('click',function(){setPal(parseInt(this.dataset.pal));});});
+  var active=el.querySelector('.active');if(active)setTimeout(function(){active.scrollIntoView({block:'nearest',behavior:'smooth'});},50);
+}
+
+function setFx(id){curFx=id;wledPost({seg:[{fx:id}]});renderFx(document.getElementById('qc-fx-search').value);var f=wledEffects.find(function(e){return e.id===id;});toast('Effect: '+(f?f.name:'#'+id));}
+function setPal(id){curPal=id;wledPost({seg:[{pal:id}]});renderPal(document.getElementById('qc-pal-search').value);var f=wledPalettes.find(function(e){return e.id===id;});toast('Palette: '+(f?f.name:'#'+id));}
+
+function initSearch(){document.getElementById('qc-fx-search').addEventListener('input',function(){renderFx(this.value);});document.getElementById('qc-pal-search').addEventListener('input',function(){renderPal(this.value);});}
+
+/* COLOR WHEEL */
+var _wheelColor={r:255,g:255,b:255};
+var _wheelTimer=null;
+
+function initColorWheel(){
+  var canvas=document.getElementById('qc-color-wheel');
+  if(!canvas)return;
+  var ctx=canvas.getContext('2d');
+  var size=canvas.width;
+  var cx=size/2,cy=size/2,radius=size/2-2;
+
+  /* Draw hue/saturation wheel */
+  for(var angle=0;angle<360;angle++){
+    var startAngle=(angle-1)*Math.PI/180;
+    var endAngle=(angle+1)*Math.PI/180;
+    var grad=ctx.createRadialGradient(cx,cy,0,cx,cy,radius);
+    grad.addColorStop(0,'hsl('+angle+',0%,100%)');
+    grad.addColorStop(1,'hsl('+angle+',100%,50%)');
+    ctx.beginPath();
+    ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,radius,startAngle,endAngle);
+    ctx.closePath();
+    ctx.fillStyle=grad;
+    ctx.fill();
+  }
+  /* Dark overlay for value/brightness handled by separate slider */
+  ctx.beginPath();
+  ctx.arc(cx,cy,radius,0,2*Math.PI);
+  ctx.strokeStyle='rgba(255,255,255,.08)';
+  ctx.lineWidth=1;
+  ctx.stroke();
+
+  var _cursorX=cx,_cursorY=cy;
+
+  function drawCursor(x,y){
+    /* Redraw wheel then draw cursor on top */
+    ctx.clearRect(0,0,size,size);
+    /* Redraw — use cached imageData if possible */
+    if(!canvas._imgData){
+      /* shouldn't reach here after first draw */
+    } else {
+      ctx.putImageData(canvas._imgData,0,0);
+    }
+    ctx.beginPath();
+    ctx.arc(x,y,7,0,2*Math.PI);
+    ctx.strokeStyle='rgba(255,255,255,.9)';
+    ctx.lineWidth=2;
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.arc(x,y,5,0,2*Math.PI);
+    ctx.strokeStyle='rgba(0,0,0,.4)';
+    ctx.lineWidth=1;
+    ctx.stroke();
+  }
+
+  /* Cache the wheel pixels once */
+  canvas._imgData=ctx.getImageData(0,0,size,size);
+
+  function pickColor(x,y){
+    var dx=x-cx,dy=y-cy;
+    if(Math.sqrt(dx*dx+dy*dy)>radius+4)return;
+    /* clamp to wheel */
+    var dist=Math.min(Math.sqrt(dx*dx+dy*dy),radius);
+    var angle=(Math.atan2(dy,dx)*180/Math.PI+360)%360;
+    var sat=dist/radius;
+    /* HSV to RGB (V driven by brightness slider) */
+    var v=parseInt(document.getElementById('sl-wheel-v').value)/255;
+    var rgb=hsvToRgb(angle/360,sat,v);
+    _wheelColor=rgb;
+    _cursorX=cx+dx/Math.sqrt(dx*dx+dy*dy+0.001)*dist;
+    _cursorY=cy+dy/Math.sqrt(dx*dx+dy*dy+0.001)*dist;
+    updateWheelUI(rgb);
+    clearTimeout(_wheelTimer);
+    _wheelTimer=setTimeout(function(){
+      /* Set solid color: fx=0, col=[[r,g,b]] per WLED JSON API */
+      wledPost({seg:[{fx:0,col:[[rgb.r,rgb.g,rgb.b]]}]});
+    },80);
+  }
+
+  function redrawCursor(){
+    ctx.putImageData(canvas._imgData,0,0);
+    drawCursor(_cursorX,_cursorY);
+  }
+
+  /* Pointer events */
+  var _dragging=false;
+  canvas.addEventListener('pointerdown',function(e){
+    _dragging=true;canvas.setPointerCapture(e.pointerId);
+    var rect=canvas.getBoundingClientRect();
+    var scaleX=size/rect.width,scaleY=size/rect.height;
+    pickColor((e.clientX-rect.left)*scaleX,(e.clientY-rect.top)*scaleY);
+    redrawCursor();
+  });
+  canvas.addEventListener('pointermove',function(e){
+    if(!_dragging)return;
+    var rect=canvas.getBoundingClientRect();
+    var scaleX=size/rect.width,scaleY=size/rect.height;
+    pickColor((e.clientX-rect.left)*scaleX,(e.clientY-rect.top)*scaleY);
+    redrawCursor();
+  });
+  canvas.addEventListener('pointerup',function(){_dragging=false;});
+
+  /* Brightness slider */
+  var bv=document.getElementById('sl-wheel-v');
+  var bvFill=document.getElementById('fill-wheel-v');
+  bv.addEventListener('input',function(){
+    var v=parseInt(this.value);
+    document.getElementById('qc-wheel-bv').textContent=v;
+    bvFill.style.width=((v/255)*100)+'%';
+    /* Recompute color at current cursor position using new V */
+    var dx=_cursorX-cx,dy=_cursorY-cy;
+    var dist=Math.sqrt(dx*dx+dy*dy);
+    var angle=(Math.atan2(dy,dx)*180/Math.PI+360)%360;
+    var sat=dist/radius;
+    var rgb=hsvToRgb(angle/360,sat,v/255);
+    _wheelColor=rgb;
+    updateWheelUI(rgb);
+    clearTimeout(_wheelTimer);
+    _wheelTimer=setTimeout(function(){
+      wledPost({seg:[{fx:0,col:[[rgb.r,rgb.g,rgb.b]]}]});
+    },80);
+  });
+
+  /* Init cursor center */
+  redrawCursor();
+}
+
+function updateWheelUI(rgb){
+  var hex='#'+[rgb.r,rgb.g,rgb.b].map(function(c){return c.toString(16).padStart(2,'0').toUpperCase();}).join('');
+  var prev=document.getElementById('qc-color-preview');
+  var hexEl=document.getElementById('qc-color-hex');
+  if(prev)prev.style.background=hex;
+  if(hexEl)hexEl.textContent=hex;
+}
+
+function hsvToRgb(h,s,v){
+  var r,g,b,i=Math.floor(h*6),f=h*6-i,p=v*(1-s),q=v*(1-f*s),t=v*(1-(1-f)*s);
+  switch(i%6){case 0:r=v;g=t;b=p;break;case 1:r=q;g=v;b=p;break;case 2:r=p;g=v;b=t;break;case 3:r=p;g=q;b=v;break;case 4:r=t;g=p;b=v;break;case 5:r=v;g=p;b=q;break;}
+  return{r:Math.round(r*255),g:Math.round(g*255),b:Math.round(b*255)};
+}
+
+function initEffectSliders(){
+  document.getElementById('sl-bx').addEventListener('input',function(){var v=parseInt(this.value);setRange('bx',v);clearTimeout(_dt['bx']);_dt['bx']=setTimeout(function(){wledPost({bri:v});},60);});
+  ['sx','ix'].forEach(function(key){document.getElementById('sl-'+key).addEventListener('input',function(){var v=parseInt(this.value);setRange(key,v);clearTimeout(_dt[key]);var k=key;_dt[k]=setTimeout(function(){var p={};p[k]=v;wledPost({seg:[p]});},60);});});
+}
+
+function buildSliders(){var wrap=document.getElementById('qc-sliders');if(!wrap)return;SLIDERS.forEach(function(def){var row=document.createElement('div');row.className='qc-sr';row.innerHTML='<div class="qc-sl"><span class="qc-sn">'+def.lbl+'</span><span class="qc-sv" id="val-'+def.key+'">–</span></div><div class="qc-stw"><input type="range" class="qc-slider" id="sl-'+def.key+'" min="'+def.min+'" max="'+def.max+'" step="'+def.step+'" value="'+def.min+'"><div class="qc-fill" id="fill-'+def.key+'" style="width:0%"></div></div><div class="qc-bounds"><span>'+def.min+'</span><span>'+def.max+'</span></div>';wrap.appendChild(row);document.getElementById('sl-'+def.key).addEventListener('input',function(){var v=parseFloat(this.value);updateSlider(def,v);var d=def;clearTimeout(_dt[d.key]);_dt[d.key]=setTimeout(function(){requestAdjustment(d.key,d.toS(v));},40);});});}
+
+function populate(){var adj=getAdj();if(!adj)return;SLIDERS.forEach(function(def){var raw=adj[def.key];if(raw==null)return;var d=def.toD(raw);var el=document.getElementById('sl-'+def.key);if(el)el.value=d;updateSlider(def,d);});highlightTemp(adj);}
+
+function attachAdjListener(){if(!window.hyperhdr)return;$(window.hyperhdr).on('adjustment-update.qc',function(e,data){if(!data)return;SLIDERS.forEach(function(def){if(data[def.key]==null)return;var d=def.toD(data[def.key]);var el=document.getElementById('sl-'+def.key);if(el&&Math.abs(parseFloat(el.value)-d)>0.001){el.value=d;updateSlider(def,d);}});highlightTemp(data);});}
+function attachCompListener(){if(!window.hyperhdr)return;$(window.hyperhdr).on('components-updated.qc',function(e,comp){if(!comp)return;if(comp.name==='ALL'){masterOn=comp.enabled;updatePowerBtn();}});}
+
+function updateSlider(def,dv){var lbl=document.getElementById('val-'+def.key);if(lbl)lbl.textContent=def.dec>0?parseFloat(dv).toFixed(def.dec):Math.round(dv);var fill=document.getElementById('fill-'+def.key),el=document.getElementById('sl-'+def.key);if(fill&&el){var pct=((dv-parseFloat(el.min))/(parseFloat(el.max)-parseFloat(el.min)))*100;fill.style.width=Math.max(0,Math.min(100,pct))+'%';}}
+function setRange(key,val){var fill=document.getElementById('fill-'+key),lbl=document.getElementById('val-'+key),el=document.getElementById('sl-'+key);if(fill&&el){el.value=val;var p=((val-parseFloat(el.min))/(parseFloat(el.max)-parseFloat(el.min)))*100;fill.style.width=Math.max(0,Math.min(100,p))+'%';}if(lbl)lbl.textContent=val;}
+function getAdj(){if(window.serverInfo&&Array.isArray(window.serverInfo.adjustment)&&window.serverInfo.adjustment.length)return window.serverInfo.adjustment[0];if(window.serverConfig&&window.serverConfig.color&&Array.isArray(window.serverConfig.color.channelAdjustment)&&window.serverConfig.color.channelAdjustment.length)return window.serverConfig.color.channelAdjustment[0];return null;}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function toast(msg){var el=document.getElementById('qc-toast');if(!el)return;el.textContent=msg;el.classList.add('show');clearTimeout(_toastTmr);_toastTmr=setTimeout(function(){el.classList.remove('show');},2000);}
+
+/* ── SAVE (PERMANENTLY WRITE) ADJUSTMENTS & TEMPERATURE ────────────────────
+   Live adjustment calls (requestAdjustment) only apply values temporarily.
+   To make them stick across restarts, we must call requestWriteConfig() with
+   the full patched color block — exactly as presets.js applySettings() does.
+
+   Steps:
+   1. Clone window.serverConfig.color as the base (preserves all other fields
+      like red/green/blue channel curves, backlight, etc.)
+   2. Patch channelAdjustment[0] with current slider values (using the same
+      toS() converters that requestAdjustment uses).
+   3. Patch channelAdjustment[0].white from the active temperature card.
+   4. Call requestWriteConfig({color: patched}) — this writes permanently.
+   5. Mirror patched value back into window.serverConfig so UI stays in sync.
+   Live adjustment logic is NOT touched.
+────────────────────────────────────────────────────────────────────────────*/
+function saveConfigSnapshot(){
+  if(typeof requestWriteConfig!=='function'){
+    toast('requestWriteConfig not available');
+    console.warn('[QC] requestWriteConfig not available — cannot save permanently.');
+    return;
+  }
+
+  /* 1. Clone existing color config as base */
+  var colorCfg={};
+  try{
+    if(window.serverConfig&&window.serverConfig.color)
+      colorCfg=JSON.parse(JSON.stringify(window.serverConfig.color));
+  }catch(e){}
+
+  /* 2. Ensure channelAdjustment[0] exists */
+  if(!Array.isArray(colorCfg.channelAdjustment)||!colorCfg.channelAdjustment.length)
+    colorCfg.channelAdjustment=[{}];
+  var ch=colorCfg.channelAdjustment[0];
+
+  /* 3. Patch slider values — same toS() conversion as requestAdjustment() */
+  SLIDERS.forEach(function(def){
+    var el=document.getElementById('sl-'+def.key);
+    if(el) ch[def.key]=parseFloat(def.toS(parseFloat(el.value)));
+  });
+
+  /* 4. Patch white temperature from the active card */
+  var activeCard=document.querySelector('.qc-temp-card.active');
+  if(activeCard){
+    var idx=parseInt(activeCard.dataset.idx);
+    var p=TEMP_PRESETS[idx];
+    if(p) ch.white=[p.r,p.g,p.b];
+  }
+
+  /* 5. Write permanently via requestWriteConfig */
+  try{
+    requestWriteConfig({color:colorCfg});
+    /* Mirror back into serverConfig so other UI stays consistent */
+    if(window.serverConfig) window.serverConfig.color=JSON.parse(JSON.stringify(colorCfg));
+  }catch(e){
+    console.error('[QC] requestWriteConfig error:',e);
+    toast('Save failed — see console');
+    return;
+  }
+
+  /* 6. Visual feedback */
+  var btn=document.getElementById('qc-save-config');
+  if(btn){
+    var origHTML=btn.innerHTML;
+    btn.classList.add('saved');
+    btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:14px;height:14px;flex-shrink:0"><polyline points="20 6 9 17 4 12"/></svg> Saved!';
+    setTimeout(function(){btn.innerHTML=origHTML;btn.classList.remove('saved');},2200);
+  }
+  toast('Adjustments saved permanently');
+}
+
+document.addEventListener('click',function(e){
+  if(e.target&&(e.target.id==='qc-save-config'||e.target.closest('#qc-save-config')))
+    saveConfigSnapshot();
+});
+
+if(window.hyperhdr){$(window.hyperhdr).off('adjustment-update.qc');$(window.hyperhdr).off('components-updated.qc');$(window.hyperhdr).off('ready.qc');}
+if(window.serverInfo&&window.serverInfo.adjustment){init();}else if(window.hyperhdr){$(window.hyperhdr).one('ready.qc',init);}else{var _n=0,_p=setInterval(function(){if(window.serverInfo&&window.serverInfo.adjustment){clearInterval(_p);init();}else if(++_n>40){clearInterval(_p);init();}},150);}
+
+})();
+</script>

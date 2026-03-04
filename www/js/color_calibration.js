@@ -937,19 +937,41 @@
         var W = canvas.width, H = canvas.height;
         var cx = W/2, cy = H/2, r = Math.min(W,H)/2 - 2;
 
-        for (var deg = 0; deg < 360; deg++) {
-            var a0 = (deg-1)*Math.PI/180, a1 = deg*Math.PI/180;
-            var gr = wheelCtx.createRadialGradient(cx,cy,0, cx,cy,r);
-            gr.addColorStop(0,   'hsl('+deg+',0%,100%)');
-            gr.addColorStop(0.5, 'hsl('+deg+',100%,50%)');
-            gr.addColorStop(1,   'hsl('+deg+',100%,8%)');
-            wheelCtx.beginPath();
-            wheelCtx.moveTo(cx,cy);
-            wheelCtx.arc(cx,cy,r,a0,a1);
-            wheelCtx.closePath();
-            wheelCtx.fillStyle = gr;
-            wheelCtx.fill();
+        /* Lightweight single-pass ImageData renderer */
+        var imgData = wheelCtx.createImageData(W, H);
+        var data = imgData.data;
+        for (var py = 0; py < H; py++) {
+            for (var px2 = 0; px2 < W; px2++) {
+                var dx2 = px2 - cx, dy2 = py - cy;
+                var dist2 = Math.sqrt(dx2*dx2 + dy2*dy2);
+                if (dist2 > r) continue;
+                var hue = (Math.atan2(dy2, dx2) * 180 / Math.PI + 360) % 360;
+                var sat = dist2 / r;
+                /* HSV-style: full saturation ring, white at center */
+                var h6 = hue / 60, hi = Math.floor(h6), f = h6 - hi;
+                var q = 1 - f, t2 = f;
+                var rr, gg, bb;
+                if      (hi === 0) { rr=1;   gg=t2;  bb=0;  }
+                else if (hi === 1) { rr=q;   gg=1;   bb=0;  }
+                else if (hi === 2) { rr=0;   gg=1;   bb=t2; }
+                else if (hi === 3) { rr=0;   gg=q;   bb=1;  }
+                else if (hi === 4) { rr=t2;  gg=0;   bb=1;  }
+                else               { rr=1;   gg=0;   bb=q;  }
+                /* blend towards white by (1-sat) */
+                var idx = (py * W + px2) * 4;
+                data[idx]   = Math.round((rr * sat + (1 - sat)) * 255);
+                data[idx+1] = Math.round((gg * sat + (1 - sat)) * 255);
+                data[idx+2] = Math.round((bb * sat + (1 - sat)) * 255);
+                data[idx+3] = 255;
+            }
         }
+        wheelCtx.putImageData(imgData, 0, 0);
+        /* clip to circle */
+        wheelCtx.globalCompositeOperation = 'destination-in';
+        wheelCtx.beginPath();
+        wheelCtx.arc(cx, cy, r, 0, Math.PI * 2);
+        wheelCtx.fill();
+        wheelCtx.globalCompositeOperation = 'source-over';
 
         canvas.addEventListener('mousedown', wheelMouseDown);
         canvas.addEventListener('touchstart', wheelTouchStart, { passive: false });

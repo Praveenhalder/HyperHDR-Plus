@@ -305,6 +305,9 @@ $(document).ready(function () {
 	});
 
 	$(window.hyperhdr).one("ready", function (event) {
+		if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#overview') {
+			window.location.hash = '#quick_controls';
+		}
 		loadContent();
 	});
 
@@ -431,6 +434,13 @@ function suppressMissingLutWarning()
 }
 
 //Dark Mode
+function updateLogoForMode() {
+	var isDark = $("body").hasClass("dark-mode");
+	var logo = $("#left_top_hyperhdr_logo");
+	if (logo.length) {
+		logo.attr("src", isDark ? "/img/hyperhdr/hyperhdrwhitelogo.png" : "/img/hyperhdr/hyperhdrlogo.png");
+	}
+}
 $("#btn_darkmode").off().on("click",function(e){
 
 	if(getStorage("darkMode", false) != "on")
@@ -442,8 +452,13 @@ $("#btn_darkmode").off().on("click",function(e){
 		handleLightMode();
 		setStorage("darkMode", "off", false);
 		setStorage("darkModeOverwrite", true, true);		
-	}	
+	}
+	// Swap logo after mode class is applied
+	setTimeout(updateLogoForMode, 50);
 });
+
+// Set correct logo on initial load
+$(document).ready(function() { updateLogoForMode(); });
 
 $(window).on('resize', function() {
 	resizeMainWindow();
