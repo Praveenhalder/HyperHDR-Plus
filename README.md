@@ -1,6 +1,28 @@
 ![C++20](https://img.shields.io/badge/Language-C%2B%2B20-blue) ![CMake](https://img.shields.io/badge/Build%20System-CMake-orange) ![MIT](https://img.shields.io/badge/License-MIT-brightgreen) ![Objective‑C++](https://img.shields.io/badge/Language-Objective‑C%2B%2B-lightblue) ![JavaScript](https://img.shields.io/badge/Language-JavaScript-teal) ![HTML](https://img.shields.io/badge/Language-HTML-orange) ![Linear Algebra](https://img.shields.io/badge/Linear%20Algebra-Vector%20Computations-maroon) ![JSON API](https://img.shields.io/badge/JSON%20API-supported-blue) ![Bootstrap 5](https://img.shields.io/badge/UI‑Framework-Bootstrap%205-purple) ![DirectX](https://img.shields.io/badge/DirectX-supported-lightblue) ![Wayland‑PipeWire](https://img.shields.io/badge/Wayland‑PipeWire-supported-teal) ![Sound Reactive](https://img.shields.io/badge/Sound-Reactive-brightgreen) ![MQTT](https://img.shields.io/badge/MQTT-supported-orange) ![mDNS‑Zeroconf](https://img.shields.io/badge/mDNS‑Zeroconf-supported-lightblue) ![USB Grabbers](https://img.shields.io/badge/USB%20Grabbers-enabled-blueviolet) ![Raspberry Pi ARM](https://img.shields.io/badge/Raspberry%20Pi‑ARM-64bit-brightgreen) ![x64](https://img.shields.io/badge/Architecture-x64-blue) ![ARM](https://img.shields.io/badge/Architecture-ARM-orange) ![WLED](https://img.shields.io/badge/WLED-supported-brightgreen) ![Home Assistant](https://img.shields.io/badge/Home%20Assistant-supported-orange) ![Adalight](https://img.shields.io/badge/Adalight-supported-purple)
 
 
+# Praveen's HyperHDR Plus
+
+A redesigned desktop interface for **HyperHDR** with built-in controls and simplified setup.
+
+## Added Features
+
+- **Built-in WebEngine** – No browser required  
+- **4-Step Setup Wizard** – Quick and simple initial configuration  
+- **Quick Control Panel** – All important settings in one place  
+- **Integrated WLED Effects** – Control WLED effects directly from the app  
+- **Color Calibration Tool** – Adjust RGB, brightness, and gamma  
+- **Preset Manager** – Save and switch between multiple configurations  
+- **Modern UI Redesign** – Cleaner and more intuitive interface
+
+## Preview
+<img width="1729" height="1087" alt="Screenshot 2026-03-05 025800" src="https://github.com/user-attachments/assets/5904d693-01b9-4ca3-ad6a-1ca4feb76290" />
+
+
+
+## Build
+Built with **Qt6**, **HyperHDR**, and **WLED integration**.
+
 ## 🚀 What's New
 
 ### 🌐 Built-in WebEngine UI
