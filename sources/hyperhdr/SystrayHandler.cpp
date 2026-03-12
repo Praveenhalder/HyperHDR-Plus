@@ -249,6 +249,25 @@ void SystrayHandler::createSystray()
 			QUEUE_CALL_0(sh, settings);
 	};
 
+	// "Keep UI loaded" toggle — visible only when a UiLauncher is present.
+	// Uses label-change pattern (same as autostart) because isChecked alone
+	// only renders a checkmark when checkGroup is also set (radio groups).
+	std::unique_ptr<SystrayMenu> keepUiMenu;
+	if (_uiLauncher != nullptr)
+	{
+		keepUiMenu = std::make_unique<SystrayMenu>();
+		loadSvg(keepUiMenu, ":/autorun.svg", _rootFolder);
+		keepUiMenu->label   = _uiLauncher->keepLoaded()
+		                        ? "Keep UI loaded: ON"
+		                        : "Keep UI loaded: OFF";
+		keepUiMenu->context = this;
+		keepUiMenu->callback = [](SystrayMenu* m) {
+			SystrayHandler* sh = qobject_cast<SystrayHandler*>(m->context);
+			if (sh != nullptr)
+				QUEUE_CALL_0(sh, toggleKeepUiLoaded);
+		};
+	}
+
 	// separator 1
 	std::unique_ptr<SystrayMenu> separator1 = std::make_unique<SystrayMenu>();
 	separator1->label = "-";
@@ -440,7 +459,13 @@ void SystrayHandler::createSystray()
 	std::swap(separator1->next, instances);
 #endif
 
-	std::swap(settingsMenu->next, separator1);	
+	std::swap(settingsMenu->next, separator1);
+	if (keepUiMenu != nullptr)
+	{
+		// Insert: Settings → Keep UI Loaded → separator1 → ...
+		std::swap(keepUiMenu->next, settingsMenu->next);   // keepUiMenu->next = separator1
+		std::swap(settingsMenu->next, keepUiMenu);         // settingsMenu->next = keepUiMenu
+	}
 	std::swap(mainMenu->submenu, settingsMenu);
 
 	SystrayUpdate(mainMenu.get());
@@ -482,6 +507,17 @@ void SystrayHandler::setColor(ColorRgb color)
 		QUEUE_CALL_4(instanceManager.get(), setInstanceColor, int, _selectedInstance, int, 1, ColorRgb, color, int, 0);
 }
 
+
+void SystrayHandler::toggleKeepUiLoaded()
+{
+	if (_uiLauncher == nullptr)
+		return;
+
+	_uiLauncher->setKeepLoaded(!_uiLauncher->keepLoaded());
+
+	// Rebuild the tray menu so the checkmark reflects the new state immediately.
+	createSystray();
+}
 
 void SystrayHandler::settings()
 {

@@ -57,6 +57,7 @@ public slots:
 	void close();
 	void setAutorunState();
 	void selectInstance();
+	void toggleKeepUiLoaded();   // called from the systray "Keep UI loaded" item
 
 private slots:
 	void signalInstanceStateChangedHandler(hyperhdr::InstanceState state, quint8 instance, const QString& name);
@@ -76,4 +77,3 @@ private:
 	int								_selectedInstance;
 	UiLauncher*						_uiLauncher;
 };
-

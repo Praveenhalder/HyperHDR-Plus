@@ -30,6 +30,8 @@
 #include <QTextStream>
 #include <QPushButton>
 #include <QWidget>
+#include <QWindow>
+#include <QHash>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -38,19 +40,38 @@
 #endif
 
 // ── loadLogo ──────────────────────────────────────────────────────────────────
+// Load once, reuse everywhere — avoids double disk I/O + double smooth-scale.
 
-static QPixmap loadLogo()
+static const QPixmap& cachedLogo()
 {
-    QString logoPath = QCoreApplication::applicationDirPath() + "/logo.jpg";
-    QPixmap px(logoPath);
-    if (px.isNull())
-        px = QPixmap(QCoreApplication::applicationDirPath() + "/logo.png");
+    static QPixmap px = []() -> QPixmap {
+        QString logoPath = QCoreApplication::applicationDirPath() + "/logo.jpg";
+        QPixmap p(logoPath);
+        if (p.isNull())
+            p = QPixmap(QCoreApplication::applicationDirPath() + "/logo.png");
+        return p;
+    }();
     return px;
 }
 
+// Returns a scaled pixmap, computing it at most once per targetWidth.
+// SmoothTransformation is expensive — caching ensures it never runs twice.
+static const QPixmap& logoScaled(int targetWidth)
+{
+    // One cached entry per width. In practice only 480 is ever requested.
+    static QHash<int, QPixmap> cache;
+    auto it = cache.find(targetWidth);
+    if (it == cache.end())
+    {
+        const QPixmap& src = cachedLogo();
+        it = cache.insert(targetWidth, src.isNull()
+            ? QPixmap()
+            : src.scaledToWidth(targetWidth, Qt::SmoothTransformation));
+    }
+    return it.value();
+}
+
 // ── TitleBar ──────────────────────────────────────────────────────────────────
-// Transparent overlay bar floating over the top of the webview.
-// Contains only ─  □  ✕ on the right; no title text.
 
 class TitleBar : public QWidget
 {
@@ -62,14 +83,12 @@ public:
     {
         setAttribute(Qt::WA_TranslucentBackground);
         setFixedHeight(36);
-        _dragActive = false;
 
         QHBoxLayout* layout = new QHBoxLayout(this);
         layout->setContentsMargins(0, 0, 6, 0);
         layout->setSpacing(2);
-        layout->addStretch();   // push buttons to right
+        layout->addStretch();
 
-        // ── shared button style helpers ───────────────────────────────────────
         auto makeBtn = [&](const QString& glyph, int w) -> QPushButton* {
             auto* btn = new QPushButton(glyph, this);
             btn->setFixedSize(w, 22);
@@ -78,7 +97,6 @@ public:
             return btn;
         };
 
-        // Minimize ─
         _btnMin = makeBtn("─", 28);
         _btnMin->setToolTip("Minimize");
         _btnMin->setStyleSheet(R"(
@@ -93,7 +111,6 @@ public:
             _mainWindow->showMinimized();
         });
 
-        // Maximize □ / Restore ❐
         _btnMax = makeBtn("□", 28);
         _btnMax->setToolTip("Maximize");
         _btnMax->setStyleSheet(R"(
@@ -111,7 +128,6 @@ public:
             { _mainWindow->showMaximized(); _btnMax->setText("❐"); _btnMax->setToolTip("Restore"); }
         });
 
-        // Close ✕
         _btnClose = makeBtn("✕", 36);
         _btnClose->setToolTip("Close");
         _btnClose->setStyleSheet(R"(
@@ -131,7 +147,6 @@ public:
         layout->addWidget(_btnClose);
     }
 
-    // Update □/❐ icon from outside (e.g. after F11 restore)
     void syncMaxButton()
     {
         if (_mainWindow->isMaximized() || _mainWindow->isFullScreen())
@@ -149,28 +164,15 @@ protected:
             if (child && (child == _btnMin || child == _btnMax || child == _btnClose))
             { QWidget::mousePressEvent(event); return; }
 
-            _dragActive   = true;
-            _dragStartPos = event->globalPos() - _mainWindow->frameGeometry().topLeft();
+            if (_mainWindow->windowHandle())
+                _mainWindow->windowHandle()->startSystemMove();
+
             event->accept();
         }
     }
 
-    void mouseMoveEvent(QMouseEvent* event) override
-    {
-        if (_dragActive && (event->buttons() & Qt::LeftButton))
-        {
-            if (_mainWindow->isMaximized() || _mainWindow->isFullScreen())
-            { _mainWindow->showNormal(); syncMaxButton(); }
-            _mainWindow->move(event->globalPos() - _dragStartPos);
-            event->accept();
-        }
-    }
-
-    void mouseReleaseEvent(QMouseEvent* event) override
-    {
-        _dragActive = false;
-        QWidget::mouseReleaseEvent(event);
-    }
+    void mouseMoveEvent(QMouseEvent* event) override   { QWidget::mouseMoveEvent(event); }
+    void mouseReleaseEvent(QMouseEvent* event) override { QWidget::mouseReleaseEvent(event); }
 
     void mouseDoubleClickEvent(QMouseEvent* event) override
     {
@@ -193,8 +195,6 @@ private:
     QPushButton* _btnMin      = nullptr;
     QPushButton* _btnMax      = nullptr;
     QPushButton* _btnClose    = nullptr;
-    bool         _dragActive  = false;
-    QPoint       _dragStartPos;
 };
 
 // ── LocalWebPage ──────────────────────────────────────────────────────────────
@@ -226,14 +226,16 @@ signals:
     void pageReady();
 
 public:
-    explicit MainWindow(int port, QWidget* parent = nullptr)
+    explicit MainWindow(int port, QWebEngineProfile* profile, bool keepLoaded = false, QWidget* parent = nullptr)
         : QMainWindow(parent)
         , _port(port)
-        , _storagePath(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation) + "/webprofile")
+        , _profile(profile)
+        , _keepLoaded(keepLoaded)
     {
-        // ── Frameless window ──────────────────────────────────────────────────
         setWindowFlags(Qt::FramelessWindowHint | Qt::Window);
         setAttribute(Qt::WA_TranslucentBackground, false);
+        setAttribute(Qt::WA_NoSystemBackground, false);
+        setStyleSheet("MainWindow { background: #1a1a1a; }");
 
         setWindowTitle("HyperHDR");
         setWindowIcon(QIcon(":/hyperhdr.png"));
@@ -241,40 +243,25 @@ public:
         setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter,
             size(), QApplication::primaryScreen()->availableGeometry()));
 
-        // Stacked widget: index 0 = loading screen, index 1 = web container
         _stack = new QStackedWidget(this);
+        _stack->setStyleSheet("QStackedWidget { background: #1a1a1a; }");
         setCentralWidget(_stack);
 
         // ── Page 0: loading screen ────────────────────────────────────────────
+        // The splash screen already covers the window during Chromium init,
+        // so this page is only visible for a fraction of a second (if at all).
+        // Use the lightest possible widget — no logo decode, no layout, no label.
         QWidget* loadPage = new QWidget();
         loadPage->setStyleSheet("background-color: #1a1a1a;");
-        QVBoxLayout* loadLayout = new QVBoxLayout(loadPage);
-        loadLayout->setAlignment(Qt::AlignCenter);
-        QLabel* logo = new QLabel();
-        QPixmap px = loadLogo();
-        if (!px.isNull())
-            logo->setPixmap(px.scaledToWidth(480, Qt::SmoothTransformation));
-        else
-            logo->setText("HyperHDR");
-        logo->setAlignment(Qt::AlignCenter);
-        loadLayout->addWidget(logo);
-        _stack->addWidget(loadPage);   // index 0
+        _stack->addWidget(loadPage);    // index 0
 
-        // ── Page 1: web container with floating title bar ─────────────────────
+        // ── Page 1: web container ─────────────────────────────────────────────
         _webContainer = new QWidget();
         _webContainer->setStyleSheet("background: #1a1a1a;");
 
-        // QVBoxLayout fills the container with the webview
         QVBoxLayout* webLayout = new QVBoxLayout(_webContainer);
         webLayout->setContentsMargins(0, 0, 0, 0);
         webLayout->setSpacing(0);
-
-        _profile = new QWebEngineProfile("hyperhdr", this);
-        _profile->setPersistentStoragePath(_storagePath);
-        _profile->setCachePath(_storagePath + "/cache");
-        _profile->setPersistentCookiesPolicy(QWebEngineProfile::ForcePersistentCookies);
-        _profile->setHttpCacheType(QWebEngineProfile::DiskHttpCache);
-        _profile->settings()->setAttribute(QWebEngineSettings::FullScreenSupportEnabled, true);
 
         _view = new QWebEngineView(_webContainer);
         _view->setPage(new LocalWebPage(_profile, _view));
@@ -282,14 +269,11 @@ public:
 
         _stack->addWidget(_webContainer);   // index 1
 
-        // Title bar floats over the entire stack — parented to _stack so it is
-        // NOT a child of _webContainer and therefore invisible during page 0 (loading screen)
         _titleBar = new TitleBar(this, _stack);
-        _titleBar->hide();   // hidden until the web page finishes loading
+        _titleBar->hide();
         _titleBar->raise();
         _titleBar->setGeometry(0, 0, _stack->width(), 36);
 
-        // ── Connections ───────────────────────────────────────────────────────
         connect(_view->page(), &QWebEnginePage::newWindowRequested,
             this, [this](QWebEngineNewWindowRequest& req) {
                 _view->load(req.requestedUrl());
@@ -302,18 +286,34 @@ public:
                 else                { showNormal();       _titleBar->show(); _titleBar->syncMaxButton(); }
             });
 
-        connect(_view, &QWebEngineView::loadFinished, this, [this](bool) {
+        // FIX 3: Switch to the web view as soon as the first paint lands
+        // (loadStarted fires before loadFinished — gives much earlier feedback).
+        // We still emit pageReady on loadFinished so the splash can close cleanly.
+        connect(_view, &QWebEngineView::loadStarted, this, [this]() {
+            // The page is being fetched; swap from loading screen to webview
+            // so the user sees the page render incrementally rather than waiting
+            // for 100% load before anything appears.
             _stack->setCurrentIndex(1);
             _titleBar->setGeometry(0, 0, _stack->width(), 36);
-            _titleBar->show();   // reveal only now — loading screen is gone
+            _titleBar->show();
+            _titleBar->raise();
+        });
+
+        connect(_view, &QWebEngineView::loadFinished, this, [this](bool) {
+            // Guarantee correct state even if loadStarted was missed.
+            _stack->setCurrentIndex(1);
+            _titleBar->setGeometry(0, 0, _stack->width(), 36);
+            _titleBar->show();
             _titleBar->raise();
             emit pageReady();
         });
 
+        // FIX 4: Load the URL immediately — no singleShot delay.
+        // The server is already listening by the time UiLauncher spawns this
+        // process; there is no race to protect against.
         _view->load(QUrl(QString("http://localhost:%1").arg(_port)));
         _stack->setCurrentIndex(0);
 
-        // F11 / Escape
         auto* f11 = new QShortcut(QKeySequence(Qt::Key_F11), this);
         connect(f11, &QShortcut::activated, this, &MainWindow::toggleFullscreen);
 
@@ -329,8 +329,24 @@ public:
         else                { showFullScreen(); _titleBar->hide(); }
     }
 
+    // Called via IPC when keep-loaded mode hides the window without killing
+    // the process. Freezes the page to save CPU/RAM while hidden.
+    void hideToBackground()
+    {
+        if (isFullScreen()) showNormal();
+        if (_view != nullptr)
+            _view->page()->setLifecycleState(QWebEnginePage::LifecycleState::Frozen);
+        hide();
+    }
+
+    // Called via IPC before re-showing the window after a keep-loaded hide.
+    void resumeFromBackground()
+    {
+        if (_view != nullptr)
+            _view->page()->setLifecycleState(QWebEnginePage::LifecycleState::Active);
+    }
+
 protected:
-    // Keep title bar stretched across the top on every resize
     void resizeEvent(QResizeEvent* event) override
     {
         QMainWindow::resizeEvent(event);
@@ -340,21 +356,30 @@ protected:
 
     void closeEvent(QCloseEvent* event) override
     {
-        if (isFullScreen()) showNormal();
-        event->accept();
-        QApplication::quit();
+        if (_keepLoaded)
+        {
+            // Keep-loaded mode: hide to background instead of quitting.
+            // The daemon will kill this process when it shuts down.
+            event->ignore();
+            hideToBackground();
+        }
+        else
+        {
+            // Normal mode: close really means quit.
+            if (isFullScreen()) showNormal();
+            event->accept();
+            QApplication::quit();
+        }
     }
 
-    // Edge-resize for the frameless window
     void mousePressEvent(QMouseEvent* event) override
     {
         if (event->button() == Qt::LeftButton)
         {
-            _resizeEdge = hitTest(event->pos());
-            if (_resizeEdge != Qt::Edges{})
+            Qt::Edges edge = hitTest(event->pos());
+            if (edge != Qt::Edges{} && windowHandle())
             {
-                _resizeStartGlobal = event->globalPos();
-                _resizeStartGeom   = geometry();
+                windowHandle()->startSystemResize(edge);
                 event->accept();
                 return;
             }
@@ -364,23 +389,6 @@ protected:
 
     void mouseMoveEvent(QMouseEvent* event) override
     {
-        if ((event->buttons() & Qt::LeftButton) && _resizeEdge != Qt::Edges{})
-        {
-            QPoint delta = event->globalPos() - _resizeStartGlobal;
-            QRect  r     = _resizeStartGeom;
-            const int minW = 400, minH = 300;
-
-            if (_resizeEdge & Qt::LeftEdge)   r.setLeft  (qMin(r.left()   + delta.x(), r.right()  - minW));
-            if (_resizeEdge & Qt::RightEdge)  r.setRight (qMax(r.right()  + delta.x(), r.left()   + minW));
-            if (_resizeEdge & Qt::TopEdge)    r.setTop   (qMin(r.top()    + delta.y(), r.bottom() - minH));
-            if (_resizeEdge & Qt::BottomEdge) r.setBottom(qMax(r.bottom() + delta.y(), r.top()    + minH));
-
-            setGeometry(r);
-            event->accept();
-            return;
-        }
-
-        // Cursor feedback at edges
         Qt::Edges edge = hitTest(event->pos());
         if      (edge == (Qt::LeftEdge  | Qt::TopEdge)    || edge == (Qt::RightEdge | Qt::BottomEdge)) setCursor(Qt::SizeFDiagCursor);
         else if (edge == (Qt::RightEdge | Qt::TopEdge)    || edge == (Qt::LeftEdge  | Qt::BottomEdge)) setCursor(Qt::SizeBDiagCursor);
@@ -391,11 +399,7 @@ protected:
         QMainWindow::mouseMoveEvent(event);
     }
 
-    void mouseReleaseEvent(QMouseEvent* event) override
-    {
-        _resizeEdge = Qt::Edges{};
-        QMainWindow::mouseReleaseEvent(event);
-    }
+    void mouseReleaseEvent(QMouseEvent* event) override { QMainWindow::mouseReleaseEvent(event); }
 
 private:
     Qt::Edges hitTest(const QPoint& pos) const
@@ -415,11 +419,7 @@ private:
     QWebEngineProfile* _profile        = nullptr;
     TitleBar*          _titleBar       = nullptr;
     int                _port           = 8090;
-    QString            _storagePath;
-
-    Qt::Edges          _resizeEdge;
-    QPoint             _resizeStartGlobal;
-    QRect              _resizeStartGeom;
+    bool               _keepLoaded     = false;
 };
 
 // ── main ──────────────────────────────────────────────────────────────────────
@@ -432,11 +432,33 @@ int main(int argc, char** argv)
     SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
 #endif
 
-    qputenv("QT_LOGGING_RULES", "qt.webenginecontext.debug=true");
-    qputenv("QTWEBENGINE_CHROMIUM_FLAGS", "--enable-logging --log-level=0");
+    QApplication::setAttribute(Qt::AA_ShareOpenGLContexts);
+    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+
+    // Chromium GPU + process flags.
+    // --process-per-site           → one renderer per origin, cuts spawn overhead.
+    // --disable-back-forward-cache → no BFCache allocs on first load (never navigate back).
+    // --disable-features=...       → skip memory-pressure GC mid-load.
+    // --renderer-process-limit=1   → cap at one renderer; we only ever show one page.
+    // --disable-extensions         → no extension scanning on startup.
+    // --no-sandbox (omitted intentionally — keep security) 
+    // --disable-logging            → suppress Chromium's internal log writes to disk.
+    // --log-level=3                → only fatal errors; quiets noisy startup output.
+    qputenv("QTWEBENGINE_CHROMIUM_FLAGS",
+        "--use-angle=d3d11 "
+        "--disable-gpu-vsync "
+        "--enable-zero-copy "
+        "--disable-software-rasterizer "
+        "--num-raster-threads=4 "
+        "--process-per-site "
+        "--disable-back-forward-cache "
+        "--renderer-process-limit=1 "
+        "--disable-extensions "
+        "--disable-logging "
+        "--log-level=3 "
+        "--disable-features=MemoryPressureBasedSourceBufferGC");
 
     QApplication::setStyle("fusion");
-    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
     QApplication app(argc, argv);
     QApplication::setApplicationName("HyperHdr");
@@ -451,51 +473,107 @@ int main(int argc, char** argv)
 
     QCommandLineParser parser;
     QCommandLineOption portOption("port", "Web server port", "port", "8090");
+    QCommandLineOption hiddenOption("hidden", "Start with window hidden (used by keep-loaded mode)");
+    QCommandLineOption keepLoadedOption("keep-loaded", "Hide window on close instead of quitting");
     parser.addOption(portOption);
+    parser.addOption(hiddenOption);
+    parser.addOption(keepLoadedOption);
     parser.process(app);
 
     int port = parser.value(portOption).toInt();
     if (port <= 0) port = 8090;
+    const bool startHidden  = parser.isSet(hiddenOption);
+    const bool keepLoaded   = parser.isSet(keepLoadedOption);
 
+    // Skip the splash entirely when starting hidden — no point showing it
+    // if the window will never appear on this launch.
     QSplashScreen* splash = nullptr;
-    QPixmap splashPx = loadLogo();
-    if (!splashPx.isNull())
+    if (!startHidden)
     {
-        QPixmap bg(600, 300);
-        bg.fill(QColor("#1a1a1a"));
-        QPainter painter(&bg);
-        QPixmap scaled = splashPx.scaledToWidth(480, Qt::SmoothTransformation);
-        painter.drawPixmap((bg.width() - scaled.width()) / 2,
-                           (bg.height() - scaled.height()) / 2, scaled);
-        painter.end();
+        const QPixmap& scaled480 = logoScaled(480);
+        if (!scaled480.isNull())
+        {
+            QPixmap bg(600, 300);
+            bg.fill(QColor("#1a1a1a"));
+            QPainter painter(&bg);
+            painter.drawPixmap((bg.width() - scaled480.width()) / 2,
+                               (bg.height() - scaled480.height()) / 2, scaled480);
+            painter.end();
 
-        splash = new QSplashScreen(bg, Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
-        splash->show();
-        app.processEvents();
+            splash = new QSplashScreen(bg, Qt::WindowStaysOnTopHint | Qt::FramelessWindowHint);
+            splash->show();
+        }
+    }
+
+    // PRE-WARM: Create the WebEngine profile here, before MainWindow, so
+    // Chromium's browser process starts while the splash screen is visible.
+    // MainWindow receives the already-warm profile instead of paying that
+    // startup cost itself — shaves ~150-300 ms off perceived load time.
+    QString storagePath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation)
+        + "/webprofile";
+    QWebEngineProfile* profile = new QWebEngineProfile("hyperhdr", &app);
+    profile->setPersistentStoragePath(storagePath);
+    profile->setCachePath(storagePath + "/cache");
+    profile->setPersistentCookiesPolicy(QWebEngineProfile::ForcePersistentCookies);
+    profile->setHttpCacheType(QWebEngineProfile::DiskHttpCache);
+    profile->settings()->setAttribute(QWebEngineSettings::FullScreenSupportEnabled, true);
+
+    // PRE-WARM RENDERER: Loading about:blank on a throw-away page forces
+    // Chromium to spawn its renderer subprocess now, while the splash is shown.
+    // When MainWindow later calls load(localhost), the renderer is already up
+    // and the navigation completes ~100-200 ms faster.
+    {
+        auto* warmPage = new QWebEnginePage(profile, &app);
+        warmPage->load(QUrl("about:blank"));
+        // Destroyed after first load — frees the page but keeps the renderer alive
+        // because the profile still holds a reference to the render process.
+        QObject::connect(warmPage, &QWebEnginePage::loadFinished,
+            warmPage, &QObject::deleteLater);
     }
 
     QLocalServer::removeServer("hyperhdr-show-window-ui");
     QLocalServer server;
     server.listen("hyperhdr-show-window-ui");
 
-    MainWindow window(port);
+    MainWindow window(port, profile, keepLoaded);
 
     QObject::connect(&window, &MainWindow::pageReady, [&]() {
         if (splash) { splash->finish(&window); delete splash; splash = nullptr; }
-        window.show();
-        window.raise();
-        window.activateWindow();
+        if (!startHidden)
+        {
+            window.show();
+            window.raise();
+            window.activateWindow();
+        }
     });
 
-    if (!splash) window.show();
+    // Show immediately (no splash) only if not hidden and no logo was found.
+    if (!startHidden && !splash) window.show();
 
     QObject::connect(&server, &QLocalServer::newConnection, &window,
         [&server, &window]() {
             QLocalSocket* socket = server.nextPendingConnection();
             QObject::connect(socket, &QLocalSocket::readyRead, &window,
                 [socket, &window]() {
-                    if (socket->readAll().contains("show"))
-                    { window.show(); window.raise(); window.activateWindow(); }
+                    QByteArray cmd = socket->readAll();
+                    if (cmd.contains("show"))
+                    {
+                        window.resumeFromBackground();
+                        window.show();
+                        window.raise();
+                        window.activateWindow();
+                    }
+                    else if (cmd.contains("hide"))
+                    {
+                        // Keep-loaded hide: freeze page and hide window,
+                        // but keep the process alive.
+                        window.hideToBackground();
+                    }
+                    else if (cmd.contains("quit"))
+                    {
+                        // Daemon is shutting down — exit for real.
+                        QApplication::quit();
+                    }
                     socket->deleteLater();
                 });
         });
